@@ -10,6 +10,8 @@ import time                                                          # allows yo
 
 load_dotenv()
 
+# getting username and password from the env 
+
 username = os.getenv('INSTAGRAM_USERNAME')
 password = os.getenv('INSTAGRAM_PASSWORD')
 
@@ -20,6 +22,7 @@ service = Service(driver_path)                                       # tells sel
 driver = webdriver.Chrome(service=service)                           #launchees the web browser
 
 # Open a webpage and get instagram login page
+
 driver.get('https://www.instagram.com/accounts/login/')
 
 time.sleep(2)
@@ -49,9 +52,17 @@ try:
         EC.presence_of_element_located((By.XPATH, "//a[@href='/hisenberg638/']"))  # Corrected quotes inside XPath
     )
     profile_side_button.click()
+    
+    
 except Exception as e:
     print("Couldn't find or click the 'Save info' button.")
     print(e)
+    
+time.sleep(3)
+    
 
-input("Press Enter to close the browser...")  # Wait for user input to close the browser
-driver.quit() 
+
+#  go to the reel section
+
+
+
