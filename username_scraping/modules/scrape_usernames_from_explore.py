@@ -1,4 +1,5 @@
 import time
+import os
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,7 +8,7 @@ import pandas as pd  # Importing pandas for saving to Excel
 
 # Function to scrape usernames from explore
 def scrape_usernames_from_explore(driver):
-    # usernames = []
+    usernames = []
     
     try:
         # Navigate to Explore page
@@ -25,9 +26,17 @@ def scrape_usernames_from_explore(driver):
         EC.element_to_be_clickable((By.XPATH, "//button[@class='_abl-']"))
         )
         
-        count = 100
+        count = 10
          
         for c in range(count):
+            
+            username = fetch_username(driver)
+            if username:
+                usernames.append(username)
+                print(f"✅ Fetched username: {username}")
+            else:
+                print("❌ Could not fetch username.")
+            
             time.sleep(3)
             next_button_click(next_button)
             print(f"✅ Clicked the 'Next' button. ({c+1})")
@@ -35,8 +44,19 @@ def scrape_usernames_from_explore(driver):
                 
     except Exception as e:
         print(f"❌ {e}")
-
-    # return usernames
+        
+    if usernames:
+        df_new = pd.DataFrame(usernames, columns=['Username'])
+    
+    if os.path.exists('usernames.xlsx'):
+        df_existing = pd.read_excel('usernames.xlsx')
+        df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+        df_combined.drop_duplicates(subset='Username', inplace=True)  # Optional: Remove duplicates
+        df_combined.to_excel('usernames.xlsx', index=False)
+    else:
+        df_new.to_excel('usernames.xlsx', index=False)
+    
+    print("✅ Updated 'usernames.xlsx' with new usernames!")
 
 
 def click_post(driver, clickable_div):
@@ -48,3 +68,18 @@ def click_post(driver, clickable_div):
         
 def next_button_click(next_button):
         next_button.click()
+        
+
+def fetch_username(driver):
+    try:
+        username_element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//a[contains(@class, '_acan') and contains(@href, '/')]"
+            ))
+        )
+        username = username_element.text
+        return username
+    except Exception as e:
+        print(f"❌ Failed to fetch username: {e}")
+        return None 

@@ -10,7 +10,7 @@ def navigate_to_explore(driver):
     
     # Wait until the explore grid loads
     try:
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'v1Nh3')]"))
         )
         print("✅ Successfully navigated to Explore page.")        
