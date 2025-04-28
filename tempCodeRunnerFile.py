@@ -1,2 +1,0 @@
-
-    # Choose task phase
