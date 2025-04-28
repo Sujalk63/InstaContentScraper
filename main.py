@@ -7,10 +7,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
+from utilities import navigate_to_explore
+
 
 # Import our modules
-from modules.login import login_to_instagram
-from modules.navigate_to_reels import navigate_to_reels
+from utilities.login import login_to_instagram
+from username_scraping.modules.scrape_usernames_from_explore import scrape_usernames_from_explore
 
 # Load environment variables
 load_dotenv()
@@ -20,11 +22,18 @@ driver_path = r'driver/chromedriver.exe'
 service = Service(driver_path)
 driver = webdriver.Chrome(service=service)
 
-driver.maximize_window()
+try:
+    driver.maximize_window()
 
-# Perform actions
-login_to_instagram(driver)
-navigate_to_reels(driver)
+    # Login to Instagram
+    login_to_instagram(driver)
 
-input("Press Enter to close the browser...")
-driver.quit()
+    # Choose task phase
+    scrape_usernames_from_explore(driver)  # Scraping usernames phase
+    
+
+finally:
+    input("Press Enter to close the browser...")  # Give the user time to inspect the browser
+    driver.quit()  # Ensure the driver quits even if there was an error
+
+
