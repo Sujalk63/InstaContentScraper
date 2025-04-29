@@ -80,3 +80,29 @@ def save_usernames_to_excel(usernames):
             df_new.to_excel('usernames.xlsx', index=False)
         
         print("Updated 'usernames.xlsx' with new usernames!")
+        
+        
+        
+    
+    
+# def fetch_username(driver):
+#     try:
+#         # Target correct username element
+#         username_element = WebDriverWait(driver, 10).until(
+#             EC.presence_of_element_located((
+#                 By.XPATH,
+#                 "//a[contains(@href, '/') and not(contains(@href, '/reels/'))]//span[contains(@class, 'x1lliihq')]"
+#             ))
+#         )
+        
+#         username = username_element.text.strip()
+        
+#         if username:
+#             return username
+#         else:
+#             print("❌ Username text is empty.")
+#             return None
+
+#     except Exception as e:
+#         print(f"❌ Failed to fetch username: {e}")
+#         return None
