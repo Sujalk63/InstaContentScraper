@@ -31,7 +31,6 @@ def scrape_usernames_from_reels(driver):
                 print("Could not fetch username.")
             
             scroll_reel(driver)
-            time.sleep(10)  # Wait for the next reel to load
             
     except KeyboardInterrupt:
         print("Stopped by user manually!")
