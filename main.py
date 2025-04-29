@@ -2,11 +2,11 @@
 
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from utilities.login import login_to_instagram
 from username_scraping.modules.scrape_usernames_from_explore import scrape_usernames_from_explore
+from username_scraping.modules.scrape_usernames_from_reels import scrape_usernames_from_reels
+
+load_dotenv()
 
 # Get logged-in driver (with cookies or manual login if first time)
 driver = login_to_instagram()
@@ -15,8 +15,8 @@ try:
     driver.maximize_window()
     
     # Choose your scraping task
-    scrape_usernames_from_explore(driver)
-    # scrape_usernames_from_reels(driver)
+    # scrape_usernames_from_explore(driver)
+    scrape_usernames_from_reels(driver)
 
 finally:
     input("Press Enter to close the browser...")
@@ -24,6 +24,8 @@ finally:
 
 
 
+
+# without using cookie
 
 # import os
 # import time

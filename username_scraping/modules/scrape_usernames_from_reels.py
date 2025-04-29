@@ -15,11 +15,7 @@ def scrape_usernames_from_reels(driver):
     try:
         # Navigate to Reels page
         navigate_to_reels(driver)
-        
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'x1lliihq')]"))
-        )
-        
+
         while True:
             username = fetch_username(driver)
             if username:
@@ -35,37 +31,47 @@ def scrape_usernames_from_reels(driver):
                 print("Could not fetch username.")
             
             scroll_reel(driver)
-            time.sleep(2)  # Wait for the next reel to load
+            time.sleep(10)  # Wait for the next reel to load
             
     except KeyboardInterrupt:
         print("Stopped by user manually!")
          
     except Exception as e:
         print(f"{e}")
-        
+
 
 def fetch_username(driver):
     try:
-        # Wait for the username link element to be present
-        username_element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((
-                By.XPATH,
-                "//span[contains(@class, 'x1lliihq')]"  # The span where the username is visible
-            ))
-        )
+        videos = driver.find_elements(By.TAG_NAME, 'video')
         
-        username = username_element.text
-        
-        if username:
-            return username
-        else:
-            print("❌ Username text is empty.")
-            return None
-        
+        for video in videos:
+            is_playing = driver.execute_script("return arguments[0].paused === false;", video)
+            if is_playing:
+                print("Found currently playing reel.")
+                
+                # Traverse up the DOM to find the parent <a> tag with username
+                parent = video.find_element(By.XPATH, "./ancestor::div[contains(@class, 'x1lliihq')]")
+                a_tag = parent.find_element(By.XPATH, ".//a[contains(@href, '/reels/') and contains(@aria-label, ' reels')]")
+                
+                aria_label = a_tag.get_attribute("aria-label")
+                print(f"Found aria-label: {aria_label}")
+                
+                if aria_label and " " in aria_label:
+                    username = aria_label.split(" ")[0].strip()
+                    print(f"Extracted username: {username}")
+                    return username
+                else:
+                    print("aria-label does not contain expected format.")
+                    return None
+
+        print("No playing video found.")
+        return None
 
     except Exception as e:
         print(f"Failed to fetch username: {e}")
         return None
+
+
 
 def save_usernames_to_excel(usernames):
     if usernames:
@@ -81,28 +87,3 @@ def save_usernames_to_excel(usernames):
         
         print("Updated 'usernames.xlsx' with new usernames!")
         
-        
-        
-    
-    
-# def fetch_username(driver):
-#     try:
-#         # Target correct username element
-#         username_element = WebDriverWait(driver, 10).until(
-#             EC.presence_of_element_located((
-#                 By.XPATH,
-#                 "//a[contains(@href, '/') and not(contains(@href, '/reels/'))]//span[contains(@class, 'x1lliihq')]"
-#             ))
-#         )
-        
-#         username = username_element.text.strip()
-        
-#         if username:
-#             return username
-#         else:
-#             print("❌ Username text is empty.")
-#             return None
-
-#     except Exception as e:
-#         print(f"❌ Failed to fetch username: {e}")
-#         return None

@@ -8,7 +8,7 @@ def navigate_to_reels(driver):
 
     try:
         WebDriverWait(driver, 15).until(
-            EC.element_to_be_clickable((By.XPATH, "//div[contains(@class, 'x1qjc9v5')]"))
+            EC.element_to_be_clickable((By.XPATH, "//div[contains(@class, 'xz74otr')]"))
         )
         
         print("Reel has been loaded successfully")
