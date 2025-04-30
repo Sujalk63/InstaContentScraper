@@ -15,7 +15,7 @@ try:
     driver.maximize_window()
     
     # Choose your scraping task
-    # scrape_usernames_from_explore(driver)
+    # scrape_usernames_from_explore(driver)``
     scrape_usernames_from_reels(driver)
 
 finally:

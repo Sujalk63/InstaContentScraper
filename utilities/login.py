@@ -2,6 +2,7 @@ import json
 import time
 import os
 import undetected_chromedriver as uc
+# import undetected_chromedriver.v2 as uc
 
 COOKIES_PATH = os.path.join("cookies", "insta_cookies.json") # path of cookies to be saved
 

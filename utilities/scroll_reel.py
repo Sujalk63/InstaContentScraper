@@ -8,8 +8,7 @@ def scroll_reel(driver):
         
         # Send Down key
         actions.send_keys(Keys.ARROW_DOWN).perform()
-        print("Pressed Down Arrow key to scroll reels.")
         
-        time.sleep(2)  # Wait for reel to load
+        time.sleep(1)  # Wait for reel to load
     except Exception as e:
         print(f"Error while pressing Down key: {e}")

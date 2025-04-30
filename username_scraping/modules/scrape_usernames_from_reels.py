@@ -29,9 +29,44 @@ def scrape_usernames_from_reels(driver):
                     print(f"Username '{username}' already scraped. Skipping.")
             else:
                 print("Could not fetch username.")
+
+            start_time = time.time()
             
             scroll_reel(driver)
-            
+            time.sleep(1)
+            #  Remove older articles to reduce DOM bloat
+            driver.execute_script("""
+            const reels = document.querySelectorAll('article');
+            if (reels.length > 2) {
+                for (let i = 0; i < reels.length - 2; i++) {
+                     reels[i].remove();
+                    }
+                }
+            """)
+
+            # Remove paused videos (non-playing reels) to reduce memory load
+            driver.execute_script("""
+            (() => {
+                    const videos = document.querySelectorAll('video');
+                    let playingTop = null;
+
+                    for (const v of videos) {
+                        if (!v.paused) {  
+                            playingTop = v.getBoundingClientRect().top;
+                            break;
+                        }
+                    }
+                    for (const v of videos) {
+                        if (v.paused && v.getBoundingClientRect().top < playingTop) {
+                            v.remove();
+                        }
+                    }
+            })();              
+            """)
+
+            videos = driver.find_elements(By.TAG_NAME, "video")
+            print(f"Total <video> tags on page: {len(videos)}")
+
     except KeyboardInterrupt:
         print("Stopped by user manually!")
          
@@ -46,14 +81,14 @@ def fetch_username(driver):
         for video in videos:
             is_playing = driver.execute_script("return arguments[0].paused === false;", video)
             if is_playing:
-                print("Found currently playing reel.")
+                # print("Found currently playing reel.")
                 
                 # Traverse up the DOM to find the parent <a> tag with username
                 parent = video.find_element(By.XPATH, "./ancestor::div[contains(@class, 'x1lliihq')]")
                 a_tag = parent.find_element(By.XPATH, ".//a[contains(@href, '/reels/') and contains(@aria-label, ' reels')]")
                 
                 aria_label = a_tag.get_attribute("aria-label")
-                print(f"Found aria-label: {aria_label}")
+                # print(f"Found aria-label: {aria_label}")
                 
                 if aria_label and " " in aria_label:
                     username = aria_label.split(" ")[0].strip()
