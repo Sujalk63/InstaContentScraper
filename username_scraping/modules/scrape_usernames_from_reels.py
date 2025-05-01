@@ -21,16 +21,15 @@ def scrape_usernames_from_reels(driver):
             if username:
                 if username not in usernames:
                     usernames.append(username)
-                    print(f"Fetched username: {username}")
+                    print(f"✅Fetched username: {username}")
                     
                     # Save immediately after each new username
                     save_usernames_to_excel(usernames)
                 else:
-                    print(f"Username '{username}' already scraped. Skipping.")
+                    print(f"♻️Username '{username}' already scraped. Skipping.") 
             else:
-                print("Could not fetch username.")
+                print("❌Could not fetch username.")
 
-            start_time = time.time()
             
             scroll_reel(driver)
             time.sleep(1)
@@ -65,7 +64,7 @@ def scrape_usernames_from_reels(driver):
             """)
 
             videos = driver.find_elements(By.TAG_NAME, "video")
-            print(f"Total <video> tags on page: {len(videos)}")
+            # print(f"Total <video> tags on page: {len(videos)}")
 
     except KeyboardInterrupt:
         print("Stopped by user manually!")
@@ -92,7 +91,7 @@ def fetch_username(driver):
                 
                 if aria_label and " " in aria_label:
                     username = aria_label.split(" ")[0].strip()
-                    print(f"Extracted username: {username}")
+                    # print(f"Extracted username: {username}")
                     return username
                 else:
                     print("aria-label does not contain expected format.")
@@ -119,5 +118,5 @@ def save_usernames_to_excel(usernames):
         else:
             df_new.to_excel('usernames.xlsx', index=False)
         
-        print("Updated 'usernames.xlsx' with new usernames!")
+        print("✅Updated 'usernames.xlsx' with new usernames!")
         

@@ -3,8 +3,7 @@
 import os
 from dotenv import load_dotenv
 from utilities.login import login_to_instagram
-from username_scraping.modules.scrape_usernames_from_explore import scrape_usernames_from_explore
-from username_scraping.modules.scrape_usernames_from_reels import scrape_usernames_from_reels
+from username_scraping.scrape_usernames import scrape_username
 
 load_dotenv()
 
@@ -14,9 +13,20 @@ driver = login_to_instagram()
 try:
     driver.maximize_window()
     
-    # Choose your scraping task
-    # scrape_usernames_from_explore(driver)``
-    scrape_usernames_from_reels(driver)
+    print("\nWhat would you like to do?")
+    print("1. Scrape Usernames")
+    print("2. Hunt User Data (Profile + Posts/Reels)")
+    
+    task_choice = input("Enter your choice (1 or 2): ").strip()
+
+    if task_choice == "1":
+        scrape_username(driver)
+    elif task_choice == "2":
+        # You’ll define this next
+        # hunt_user_data(driver)
+        print("building")
+    else:
+        print("Invalid choice. Please enter 1 or 2.")
 
 finally:
     input("Press Enter to close the browser...")
