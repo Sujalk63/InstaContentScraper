@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from utilities.login import login_to_instagram
 from username_scraping.scrape_usernames import scrape_username
+from hunting_data.modules.hunt_user_profile_data import scrape_profiles
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ try:
     elif task_choice == "2":
         # You’ll define this next
         # hunt_user_data(driver)
-        print("building")
+        scrape_profiles(driver)
     else:
         print("Invalid choice. Please enter 1 or 2.")
 
