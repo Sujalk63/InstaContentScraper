@@ -92,33 +92,34 @@ def thread_link(driver):
         return None
     
 #7
-def external_link(driver): # when fetching external links the browser need to be opened
+def external_link(driver):
     try:
-        # Try to find and click the link button
-        link_button = WebDriverWait(driver, t).until(
-            EC.element_to_be_clickable((By.XPATH, '//section//button[@class=" _acan _acao _acas _aj1- _ap30"]'))
-        )
+        # Check if the multiple-link button exists
+        link_buttons = driver.find_elements(By.XPATH, '//section//button[contains(@class, " _acan _acao _acas _aj1- _ap30")]')
 
-        link_button.click()
+        if link_buttons:
+            link_buttons[0].click()
+
+            popup_links = WebDriverWait(driver, 3).until(
+                EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@role, "dialog")]//a'))
+            )
+            external_links = [link.get_attribute('href') for link in popup_links]
+
+        else:
+            direct_link_elem = driver.find_element(By.XPATH, '//section//div//a[starts-with(@href, "http")]')
+            direct_link = direct_link_elem.get_attribute('href')
+            external_links = [direct_link] if direct_link else []
+
+        # Filter out unwanted meta or Threads links
+        filtered_links = [
+            link for link in external_links
+            if "about.meta.com" not in link and "threads." not in link
+        ]
+        return filtered_links
 
     except Exception:
-        # Button not found or not clickable
-        # print("Link button not found or not clickable.")
         return []
-
-    try:
-        # After clicking, wait for the popup and get all <a> links
-        popup_links = WebDriverWait(driver, t).until(
-            EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@role, "dialog")]//a'))
-        )
-        external_links = [link.get_attribute('href') for link in popup_links]
-        # print("External Links Found:", external_links)
-        return external_links
-
-    except Exception:
-        print("No links found in popup.")
-        return []
-    
+ 
 # 8
 def extract_email_from_bio(profileBio):
     if not profileBio:
