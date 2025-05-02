@@ -1,7 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utilities.convert_to_number import convert_to_number
 import pandas as pd  # Importing pandas for saving to Excel
 from hunting_data.modules.hunt_profile_data_functions import *
 
@@ -17,7 +16,7 @@ def scrape_profiles(driver, usernames=None):
     """
     if usernames is None:
         # Batch mode from Excel
-        df = pd.read_excel("usernames_dummy.xlsx")
+        df = pd.read_excel("usernames.xlsx")
         usernames_list = df["Username"].dropna().unique().tolist()
     elif isinstance(usernames, str):
         # Single username mode

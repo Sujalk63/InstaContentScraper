@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.convert_to_number import convert_to_number
+from urllib.parse import urlparse, parse_qs, unquote
 import pandas as pd  # Importing pandas for saving to Excel
 import re
 import time
@@ -103,11 +104,15 @@ def external_link(driver):
             popup_links = WebDriverWait(driver, 3).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@role, "dialog")]//a'))
             )
-            external_links = [link.get_attribute('href') for link in popup_links]
+            external_links = [
+                                decode_instagram_redirect(link.get_attribute('href')) 
+                                for link in popup_links
+                             ]
+                             
 
         else:
-            direct_link_elem = driver.find_element(By.XPATH, '//section//div//a[starts-with(@href, "http")]')
-            direct_link = direct_link_elem.get_attribute('href')
+            direct_link_elem = driver.find_element(By.CSS_SELECTOR, 'a[href^="https://l.instagram.com/?u="]')
+            direct_link = decode_instagram_redirect(direct_link_elem.get_attribute('href'))
             external_links = [direct_link] if direct_link else []
 
         # Filter out unwanted meta or Threads links
@@ -168,8 +173,18 @@ def profession_label(driver):
     except Exception:
         return None
 
-
 # 12
 def printing(data):
     for key, value in data.items():
         print(f'{data["Username"]} has {key}: {value}')
+
+# 13
+def decode_instagram_redirect(url):
+    # print("Decoding URL:", url)
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    if 'u' in query:
+        decoded = unquote(query['u'][0])
+        # print("Decoded URL:", decoded)
+        return decoded
+    return url
