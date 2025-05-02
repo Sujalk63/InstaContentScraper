@@ -9,9 +9,9 @@ from utilities.scroll_reel import scroll_reel
 import pandas as pd  # Importing pandas for saving to Excel
 
 # Function to scrape usernames from reels
-def scrape_usernames_from_reels(driver):
+def scrape_usernames_from_reels(driver): # when fetching usernames from reels the browser need to be opened
     usernames = []
-    
+
     try:
         # Navigate to Reels page
         navigate_to_reels(driver)
@@ -75,6 +75,10 @@ def scrape_usernames_from_reels(driver):
 
 def fetch_username(driver):
     try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.TAG_NAME, 'video'))
+        )
+        
         videos = driver.find_elements(By.TAG_NAME, 'video')
         
         for video in videos:
