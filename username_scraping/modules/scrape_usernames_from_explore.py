@@ -9,7 +9,7 @@ import pandas as pd  # Importing pandas for saving to Excel
 count = 0
 
 # Function to scrape usernames from explore
-def scrape_usernames_from_explore(driver):
+def scrape_usernames_from_explore(driver): # keep the window open when fetching
     
     global count
     usernames = []
