@@ -6,29 +6,30 @@ from selenium.webdriver.support import expected_conditions as EC
 from utilities.navigate_to_explore import navigate_to_explore
 import pandas as pd  # Importing pandas for saving to Excel
 
+count = 0
+
 # Function to scrape usernames from explore
 def scrape_usernames_from_explore(driver):
+    
+    global count
     usernames = []
     
     try:
         # Navigate to Explore page
         navigate_to_explore(driver)
-        
-        # Wait for the div containing the posts to be present
-        clickable_div = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, "_aagw"))
-        )
-        
-        click_post(driver, clickable_div)
+        click_post(driver)
 
-        # Wait for the div containing the posts to be present
-        next_button = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "//button[@class='_abl-']"))
-        )
-        
 
         while True:
-
+            count = count + 1
+            print(count)
+            if count == 50:
+                driver.refresh()
+                navigate_to_explore(driver)
+                time.sleep(10)
+                click_post(driver)
+                count = 0
+                
             username = fetch_username(driver)
             if username:
                 if username not in usernames:
@@ -42,8 +43,8 @@ def scrape_usernames_from_explore(driver):
             else:
                 print("❌ Could not fetch username.")
             
-            time.sleep(3)
-            next_button_click(next_button)
+            time.sleep(2)
+            next_button_click(driver)
             # print(f"✅ Clicked the 'Next' button. ({c+1})")
 
 
@@ -55,20 +56,26 @@ def scrape_usernames_from_explore(driver):
         print(f"❌ {e}")
 
 
-def click_post(driver, clickable_div):
+def click_post(driver):
+    clickable_div = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, "_aagw"))
+                )
     driver.execute_script("arguments[0].scrollIntoView(true);", clickable_div)
     time.sleep(1)
     driver.execute_script("arguments[0].click();", clickable_div)
     # print("✅ Clicked on the post (div with class _aagw)")
         
         
-def next_button_click(next_button):
+def next_button_click(driver):
+        next_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "(//button[@class='_abl-'])[2]"))
+                )
         next_button.click()
         
 
 def fetch_username(driver):
     try:
-        username_element = WebDriverWait(driver, 5).until(
+        username_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//a[contains(@class, '_acan') and contains(@href, '/')]"

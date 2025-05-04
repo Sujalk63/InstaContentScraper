@@ -8,15 +8,27 @@ from utilities.navigate_to_reels import navigate_to_reels
 from utilities.scroll_reel import scroll_reel
 import pandas as pd  # Importing pandas for saving to Excel
 
+count = 0
+
 # Function to scrape usernames from reels
 def scrape_usernames_from_reels(driver): # when fetching usernames from reels the browser need to be opened
+    
     usernames = []
+    global count
 
     try:
         # Navigate to Reels page
         navigate_to_reels(driver)
 
         while True:
+            count = count + 1
+            print(count)
+            if count == 101:
+                driver.refresh()
+                time.sleep(10)
+                scroll_reel(driver)  # add this to push to next reel
+                count = 0
+
             username = fetch_username(driver)
             if username:
                 if username not in usernames:
@@ -63,7 +75,7 @@ def scrape_usernames_from_reels(driver): # when fetching usernames from reels th
             })();              
             """)
 
-            videos = driver.find_elements(By.TAG_NAME, "video")
+            # videos = driver.find_elements(By.TAG_NAME, "video")
             # print(f"Total <video> tags on page: {len(videos)}")
 
     except KeyboardInterrupt:
