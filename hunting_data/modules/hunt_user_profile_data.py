@@ -16,7 +16,7 @@ def scrape_profiles(driver, usernames=None):
     """
     if usernames is None:
         # Batch mode from Excel
-        df = pd.read_excel("usernames.xlsx")
+        df = pd.read_excel("usernames_dummy.xlsx")
         usernames_list = df["Username"].dropna().unique().tolist()
     elif isinstance(usernames, str):
         # Single username mode
@@ -98,15 +98,17 @@ def fetch_profile_data(driver, username):
         professionalLabel = profession_label(driver)
         data["Professional Label"] = professionalLabel
 
-        printing(data)
+        mark_profile_done(username)
 
-        
+        printing(data)
+    
     except Exception as e:
         print(f"Error fetching {username}: {e}")
 
     return data
 
-
+def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):
+        mark_done(username, 'is_profile_data_fetched', excel_path)
 
 #     | Feature            | Absolute XPath                        | Relative XPath                             |
 # |--------------------|----------------------------------------|--------------------------------------------|
