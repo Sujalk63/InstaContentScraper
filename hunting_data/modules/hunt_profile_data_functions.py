@@ -7,7 +7,7 @@ import pandas as pd  # Importing pandas for saving to Excel
 import re
 import os
 
-t = 2
+t = 3
 
 # 1
 def get_full_name(driver):
@@ -96,12 +96,16 @@ def thread_link(driver):
 def external_link(driver):
     try:
         # Check if the multiple-link button exists
+        # link_buttons = driver.find_elements(By.XPATH, '//section//button[contains(@class, " _acan _acao _acas _aj1- _ap30")]')
+        WebDriverWait(driver, t).until(
+            EC.presence_of_element_located((By.XPATH, '//section//button[contains(@class, " _acan _acao _acas _aj1- _ap30")]'))
+        )
         link_buttons = driver.find_elements(By.XPATH, '//section//button[contains(@class, " _acan _acao _acas _aj1- _ap30")]')
 
         if link_buttons:
             link_buttons[0].click()
 
-            popup_links = WebDriverWait(driver, 3).until(
+            popup_links = WebDriverWait(driver, t).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@role, "dialog")]//a'))
             )
             external_links = [
@@ -111,7 +115,10 @@ def external_link(driver):
                              
 
         else:
-            direct_link_elem = driver.find_element(By.CSS_SELECTOR, 'a[href^="https://l.instagram.com/?u="]')
+            # direct_link_elem = driver.find_element(By.CSS_SELECTOR, 'a[href^="https://l.instagram.com/?u="]')
+            direct_link_elem = WebDriverWait(driver, t).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href^="https://l.instagram.com/?u="]'))
+             )
             direct_link = decode_instagram_redirect(direct_link_elem.get_attribute('href'))
             external_links = [direct_link] if direct_link else []
 
@@ -156,7 +163,10 @@ def pp_link(driver, username):
 #  10
 def is_verified(driver):
     try:
-        verified_elem = driver.find_element(By.CSS_SELECTOR, 'svg[aria-label="Verified"].x1lliihq.x1n2onr6')
+        # verified_elem = driver.find_element(By.CSS_SELECTOR, 'svg[aria-label="Verified"].x1lliihq.x1n2onr6')
+        verified_elem = WebDriverWait(driver, t).until(
+           EC.presence_of_element_located((By.CSS_SELECTOR, 'svg[aria-label="Verified"].x1lliihq.x1n2onr6'))
+        )
         return True if verified_elem else False
     except Exception:
         return False
@@ -190,7 +200,7 @@ def decode_instagram_redirect(url):
     return url
 
 # 14
-def mark_done(username, column, excel_path="usernames_dummy.xlsx"):
+def mark_done(username, column, excel_path):
     """
     Marks the given column as 'done' for the specified username.
     Adds tracking columns if they don't exist.

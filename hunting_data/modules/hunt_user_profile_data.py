@@ -18,7 +18,7 @@ def scrape_profiles(driver, usernames=None):
     """
     if usernames is None:
         # Batch mode from Excel
-        df = pd.read_excel("usernames_dummy.xlsx")
+        df = pd.read_excel("usernames.xlsx") #read username from base excel file
         usernames_list = df["Username"].tolist()
     elif isinstance(usernames, str):
         # Single username mode
@@ -30,11 +30,18 @@ def scrape_profiles(driver, usernames=None):
         return
 
     for username in usernames_list:
-        if is_fetch_done(username, excel_path="usernames_dummy.xlsx"):
+        if is_fetch_done(username, excel_path="usernames.xlsx"): #check username from base excel file
             print(f"⏭️ Skipping {username} (already marked as Done)")
             continue
+
         data = fetch_profile_data(driver, username)
-        save_profile_data_to_excel(data, file_path='usernames_profile_data.xlsx')
+
+        if data is None:
+            print(f"⚠️ Skipping saving for {username} due to fetch failure.")
+            mark_profile_done(username)
+            continue  # ensures we move on cleanly
+
+        save_profile_data_to_excel(data, file_path='usernames_profile_data.xlsx') # destination excel file
         # printing(data)
         
 
@@ -112,7 +119,7 @@ def fetch_profile_data(driver, username):
 
     return data
 
-def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):
+def mark_profile_done(username, excel_path="usernames.xlsx"):
         mark_done(username, 'is_profile_data_fetched', excel_path)
 
 
