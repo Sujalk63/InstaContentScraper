@@ -3,6 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd  # Importing pandas for saving to Excel
 from hunting_data.modules.hunt_profile_data_functions import *
+from utilities.is_fetching_done import is_fetch_done
+from utilities.save_to_excel import save_profile_data_to_excel
 
 
 def scrape_profiles(driver, usernames=None):
@@ -28,8 +30,12 @@ def scrape_profiles(driver, usernames=None):
         return
 
     for username in usernames_list:
+        if is_fetch_done(username, excel_path="usernames_dummy.xlsx"):
+            print(f"Skipping {username} (already marked as Done)")
+            continue
         data = fetch_profile_data(driver, username)
-        # time.sleep(60)
+        save_profile_data_to_excel(data, file_path='usernames_profile_data.xlsx')
+        printing(data)
         
 
 
@@ -100,7 +106,6 @@ def fetch_profile_data(driver, username):
 
         mark_profile_done(username)
 
-        printing(data)
     
     except Exception as e:
         print(f"Error fetching {username}: {e}")
@@ -109,6 +114,13 @@ def fetch_profile_data(driver, username):
 
 def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):
         mark_done(username, 'is_profile_data_fetched', excel_path)
+
+
+
+
+
+
+
 
 #     | Feature            | Absolute XPath                        | Relative XPath                             |
 # |--------------------|----------------------------------------|--------------------------------------------|

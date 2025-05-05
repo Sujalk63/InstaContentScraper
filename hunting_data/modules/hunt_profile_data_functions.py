@@ -5,7 +5,7 @@ from utilities.convert_to_number import convert_to_number
 from urllib.parse import urlparse, parse_qs, unquote
 import pandas as pd  # Importing pandas for saving to Excel
 import re
-import time
+import os
 
 t = 2
 
@@ -190,30 +190,6 @@ def decode_instagram_redirect(url):
     return url
 
 # 14
-# def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):
-#     """
-#     Marks a username's profile as done in the Excel sheet.
-#     Adds tracking columns if they don't exist.
-#     """
-#     try:
-#         df = pd.read_excel(excel_path)
-
-#         # Add columns if they don't exist
-#         if 'is_profile_data_fetched' not in df.columns:
-#             df['is_profile_data_fetched'] = ''
-#         if 'is_content_data_fetched' not in df.columns:
-#             df['is_content_data_fetched'] = ''
-
-#         # Mark the profile as done
-#         df.loc[df['Username'] == username, 'is_profile_data_fetched'] = 'done'
-#         df.loc[df['Username'] == username, 'is_content_data_fetched'] = 'done'
-        
-#         df.to_excel(excel_path, index=False)
-#         # print(f"✅ Marked profile data fetched for: {username}")
-
-#     except Exception as e:
-#         print(f"❌ Failed to mark profile as done for {username}: {e}")
-
 def mark_done(username, column, excel_path="usernames_dummy.xlsx"):
     """
     Marks the given column as 'done' for the specified username.
@@ -236,4 +212,4 @@ def mark_done(username, column, excel_path="usernames_dummy.xlsx"):
     except Exception as e:
         print(f"❌ Failed to mark {column} as done for {username}: {e}")
 
-
+# 15
