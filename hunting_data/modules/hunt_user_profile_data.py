@@ -19,7 +19,7 @@ def scrape_profiles(driver, usernames=None):
     if usernames is None:
         # Batch mode from Excel
         df = pd.read_excel("usernames.xlsx") #read username from base excel file
-        usernames_list = df["Username"].tolist()
+        usernames_list = df["Username"].dropna().unique().tolist()
     elif isinstance(usernames, str):
         # Single username mode
         usernames_list = [usernames.strip()]
