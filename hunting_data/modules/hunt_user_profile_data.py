@@ -19,23 +19,23 @@ def scrape_profiles(driver, usernames=None):
     if usernames is None:
         # Batch mode from Excel
         df = pd.read_excel("usernames_dummy.xlsx")
-        usernames_list = df["Username"].dropna().unique().tolist()
+        usernames_list = df["Username"].tolist()
     elif isinstance(usernames, str):
         # Single username mode
         usernames_list = [usernames.strip()]
     elif isinstance(usernames, list):
         usernames_list = [u.strip() for u in usernames if isinstance(u, str)]
     else:
-        print("Invalid input format for usernames.")
+        print("❌ Invalid input format for usernames.")
         return
 
     for username in usernames_list:
         if is_fetch_done(username, excel_path="usernames_dummy.xlsx"):
-            print(f"Skipping {username} (already marked as Done)")
+            print(f"⏭️ Skipping {username} (already marked as Done)")
             continue
         data = fetch_profile_data(driver, username)
         save_profile_data_to_excel(data, file_path='usernames_profile_data.xlsx')
-        printing(data)
+        # printing(data)
         
 
 
@@ -48,7 +48,7 @@ def fetch_profile_data(driver, username):
             EC.presence_of_element_located((By.CLASS_NAME, 'xrvj5dj'))
         )
     except Exception as e:
-        print(f"Profile page did not load properly for {username}: {e}")
+        print(f"❌ Profile page did not load properly for {username}: {e}")
         return None
 
 
@@ -108,7 +108,7 @@ def fetch_profile_data(driver, username):
 
     
     except Exception as e:
-        print(f"Error fetching {username}: {e}")
+        print(f"❌ Error fetching {username}: {e}")
 
     return data
 

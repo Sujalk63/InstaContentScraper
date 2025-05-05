@@ -150,7 +150,7 @@ def pp_link(driver, username):
         return value if value else None
     
     except Exception as e:
-        print(e)
+        print("❌ :",e)
         return None
     
 #  10
@@ -212,4 +212,4 @@ def mark_done(username, column, excel_path="usernames_dummy.xlsx"):
     except Exception as e:
         print(f"❌ Failed to mark {column} as done for {username}: {e}")
 
-# 15
+

@@ -22,7 +22,7 @@ def scrape_usernames_from_reels(driver): # when fetching usernames from reels th
 
         while True:
             count = count + 1
-            print(count)
+            print("🧾:", count)
             if count == 101:
                 driver.refresh()
                 time.sleep(10)
@@ -79,10 +79,10 @@ def scrape_usernames_from_reels(driver): # when fetching usernames from reels th
             # print(f"Total <video> tags on page: {len(videos)}")
 
     except KeyboardInterrupt:
-        print("Stopped by user manually!")
+        print("⛔ Stopped by user manually!")
          
     except Exception as e:
-        print(f"{e}")
+        print(f"❌: {e}")
 
 
 def fetch_username(driver):
@@ -110,14 +110,14 @@ def fetch_username(driver):
                     # print(f"Extracted username: {username}")
                     return username
                 else:
-                    print("aria-label does not contain expected format.")
+                    print("❌ aria-label does not contain expected format.")
                     return None
 
-        print("No playing video found.")
+        print("❌ No playing video found.")
         return None
 
     except Exception as e:
-        print(f"Failed to fetch username: {e}")
+        print(f"❌ Failed to fetch username: {e}")
         return None
 
 
