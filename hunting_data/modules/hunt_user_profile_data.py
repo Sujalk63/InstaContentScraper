@@ -3,8 +3,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd  # Importing pandas for saving to Excel
 from hunting_data.modules.hunt_profile_data_functions import *
-from utilities.is_fetching_done import is_fetch_done
+# from utilities.is_fetching_done import is_fetch_done # not optimized use load_done_status instead
 from utilities.save_to_excel import save_profile_data_to_excel
+from utilities.load_done_status import load_done_status
 
 
 def scrape_profiles(driver, usernames=None):
@@ -29,15 +30,17 @@ def scrape_profiles(driver, usernames=None):
         print("❌ Invalid input format for usernames.")
         return
 
+    done_usernames = load_done_status(excel_path="usernames.xlsx")
+
     for username in usernames_list:
-        if is_fetch_done(username, excel_path="usernames.xlsx"): #check username from base excel file
+        if username in done_usernames:
             print(f"⏭️ Skipping {username} (already marked as Done)")
             continue
 
         data = fetch_profile_data(driver, username)
 
         if data is None:
-            print(f"⚠️ Skipping saving for {username} due to fetch failure.")
+            print(f"⚠️ {username} changed or deleted")
             mark_profile_done(username)
             continue  # ensures we move on cleanly
 

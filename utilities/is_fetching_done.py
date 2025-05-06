@@ -10,3 +10,5 @@ def is_fetch_done(username, excel_path):
     except Exception as e:
         print(f"Error checking if profile is done for {username}: {e}")
         return False
+    
+    # outdated: not optimized used load_done_status instead

@@ -2,6 +2,7 @@ import os
 import pandas as pd 
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.utils import get_column_letter
 
 def save_profile_data_to_excel(data, file_path):
     """
@@ -39,6 +40,10 @@ def save_profile_data_to_excel(data, file_path):
         style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True, showColumnStripes=False)
         table.tableStyleInfo = style
         ws.add_table(table)
+
+        for col in range(1, max_col + 1):
+            col_letter = get_column_letter(col)
+            ws.column_dimensions[col_letter].width = 25
 
         wb.save(file_path)
         print("📊 Excel sheet formatted as a table.")
