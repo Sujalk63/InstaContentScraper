@@ -9,6 +9,7 @@ from utilities.save_to_excel import save_profile_data_to_excel
 from utilities.load_done_status import load_done_status
 
 def scrape_profiles(driver, usernames=None, batch_size=100):
+    # print("working")
     """
     Scrapes Instagram profile data.
     If `usernames` is None, reads from usernames.xlsx.
@@ -62,6 +63,7 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
 
 
 def fetch_profile_data(driver, username):
+    # print("working from fetch")
     url = f"https://www.instagram.com/{username}/"
 
     try:
