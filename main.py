@@ -1,31 +1,32 @@
 # save cookies style
-
 import os
 from dotenv import load_dotenv
 from utilities.login import login_to_instagram
 from username_scraping.scrape_usernames import scrape_username
 from hunting_data.modules.hunt_user_profile_data import scrape_profiles
+from hunting_data.hunt_user_data import hunt_user_data
 
 load_dotenv()
 
 # Get logged-in driver (with cookies or manual login if first time)
 driver = login_to_instagram()
+# print(f"printing driver: {driver}")
 
 try:
     driver.maximize_window()
     
     print("\nWhat would you like to do?")
     print("1. Scrape Usernames")
-    print("2. Hunt User Data (Profile + Posts/Reels)")
+    print("2. Hunt User Data (Profile + Content)")
     
     task_choice = input("Enter your choice (1 or 2): ").strip()
 
     if task_choice == "1":
         scrape_username(driver)
     elif task_choice == "2":
-        # You’ll define this next
-        # hunt_user_data(driver)
-        scrape_profiles(driver)
+        # You’ll define this next,
+        hunt_user_data(driver)
+        # scrape_profiles(driver)
     else:
         print("Invalid choice. Please enter 1 or 2.")
 
@@ -33,9 +34,8 @@ finally:
     input("Press Enter to close the browser...")
     driver.quit()
 
-# Appended data for: johnderting
-# ✅ Appended data for: justreelisticvibes_
 
+# shreyasmendiratta 0
 
 
 # without using cookie
