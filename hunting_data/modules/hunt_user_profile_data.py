@@ -3,14 +3,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd  # Importing pandas for saving to Excel
 from hunting_data.modules.hunt_profile_data_functions import *
+
 # from utilities.is_fetching_done import is_fetch_done # not optimized use load_done_status instead
 from utilities.save_to_excel import save_profile_data_to_excel
 from utilities.load_done_status import load_done_status
 
-
-def scrape_profiles(driver, usernames=None):
-
-
+def scrape_profiles(driver, usernames=None, batch_size=100):
     """
     Scrapes Instagram profile data.
     If `usernames` is None, reads from usernames.xlsx.
@@ -18,11 +16,9 @@ def scrape_profiles(driver, usernames=None):
     If `usernames` is a list, scrapes all usernames in the list.
     """
     if usernames is None:
-        # Batch mode from Excel
-        df = pd.read_excel("usernames.xlsx") #read username from base excel file
+        df = pd.read_excel("usernames.xlsx")
         usernames_list = df["Username"].dropna().unique().tolist()
     elif isinstance(usernames, str):
-        # Single username mode
         usernames_list = [usernames.strip()]
     elif isinstance(usernames, list):
         usernames_list = [u.strip() for u in usernames if isinstance(u, str)]
@@ -31,22 +27,38 @@ def scrape_profiles(driver, usernames=None):
         return
 
     done_usernames = load_done_status(excel_path="usernames.xlsx")
+    profile_data_batch = []
 
-    for username in usernames_list:
-        if username in done_usernames:
-            print(f"⏭️ Skipping {username} (already marked as Done)")
-            continue
+    try:
+        for i, username in enumerate(usernames_list):
+            print(f"{username} {i}")
+            if username in done_usernames:
+                print(f"⏭️ Skipping {username} (already marked as Done)")
+                continue
 
-        data = fetch_profile_data(driver, username)
+            data = fetch_profile_data(driver, username)
 
-        if data is None:
-            print(f"⚠️ {username} changed or deleted")
-            mark_profile_done(username)
-            continue  # ensures we move on cleanly
+            if data is None:
+                print(f"⚠️ {username} changed or deleted")
+                mark_profile_done(username)
+                continue
 
-        save_profile_data_to_excel(data, file_path='usernames_profile_data.xlsx') # destination excel file
-        # printing(data)
-        
+            profile_data_batch.append(data)
+
+            if len(profile_data_batch) >= batch_size:
+                save_profile_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx")
+                print(f"✅ Saved batch of {batch_size} profiles to Excel.")
+                for profile in profile_data_batch:
+                    mark_profile_done(profile["Username"])
+                profile_data_batch = []
+
+    finally:
+        if profile_data_batch:
+            print(f"⚠️ Saving final unsaved batch of {len(profile_data_batch)} profiles.")
+            save_profile_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx")
+            for profile in profile_data_batch:
+                mark_profile_done(profile["Username"])
+
 
 
 def fetch_profile_data(driver, username):
@@ -55,12 +67,11 @@ def fetch_profile_data(driver, username):
     try:
         driver.get(url)
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'xrvj5dj'))
+            EC.presence_of_element_located((By.CLASS_NAME, "xrvj5dj"))
         )
     except Exception as e:
         print(f"❌ Profile page did not load properly for {username}: {e}")
         return None
-
 
     data = {
         "Username": username,
@@ -76,11 +87,11 @@ def fetch_profile_data(driver, username):
         # "Business Category Label": None,
         "Profile Picture URL": None,
         "Is Verified": False,
-        "Professional Label": None
+        "Professional Label": None,
     }
 
     try:
-        
+
         fullName = get_full_name(driver)
         data["Full Name"] = fullName
 
@@ -92,16 +103,16 @@ def fetch_profile_data(driver, username):
 
         followingCount = following_count(driver)
         data["Following Count"] = followingCount
-        
+
         profileBio = profile_bio(driver)
         data["Profile Bio"] = profileBio
-        
+
         threadLink = thread_link(driver)
         data["Thread Link"] = threadLink
 
         externalLink = external_link(driver)
         data["External Link"] = externalLink
-        
+
         email = extract_email_from_bio(profileBio)
         data["Email in Bio"] = email
 
@@ -116,20 +127,14 @@ def fetch_profile_data(driver, username):
 
         mark_profile_done(username)
 
-    
     except Exception as e:
         print(f"❌ Error fetching {username}: {e}")
 
     return data
 
+
 def mark_profile_done(username, excel_path="usernames.xlsx"):
-        mark_done(username, 'is_profile_data_fetched', excel_path)
-
-
-
-
-
-
+    mark_done(username, "is_profile_data_fetched", excel_path)
 
 
 #     | Feature            | Absolute XPath                        | Relative XPath                             |
