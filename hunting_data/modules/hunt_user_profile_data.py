@@ -5,7 +5,7 @@ import pandas as pd  # Importing pandas for saving to Excel
 from hunting_data.modules.hunt_profile_data_functions import *
 
 # from utilities.is_fetching_done import is_fetch_done # not optimized use load_done_status instead
-from utilities.save_to_excel import save_profile_data_to_excel
+from utilities.save_to_excel import save_data_to_excel
 from utilities.load_done_status import load_done_status
 
 def scrape_profiles(driver, usernames=None, batch_size=100):
@@ -27,7 +27,7 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
         print("❌ Invalid input format for usernames.")
         return
 
-    done_usernames = load_done_status(excel_path="usernames.xlsx")
+    done_usernames = load_done_status(excel_path="usernames.xlsx", coloumn="is_profile_data_fetched")
     profile_data_batch = []
 
     try:
@@ -47,7 +47,7 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
             profile_data_batch.append(data)
 
             if len(profile_data_batch) >= batch_size:
-                save_profile_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx")
+                save_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx", table_name="profileDataTable")
                 print(f"✅ Saved batch of {batch_size} profiles to Excel.")
                 for profile in profile_data_batch:
                     mark_profile_done(profile["Username"])
@@ -56,7 +56,7 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
     finally:
         if profile_data_batch:
             print(f"⚠️ Saving final unsaved batch of {len(profile_data_batch)} profiles.")
-            save_profile_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx")
+            save_data_to_excel(profile_data_batch, file_path="usernames_profile_data.xlsx", table_name="profileDataTable")
             for profile in profile_data_batch:
                 mark_profile_done(profile["Username"])
 
