@@ -1,15 +1,16 @@
 import os
-import pandas as pd 
+import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
+
 
 def save_data_to_excel(data, file_path, table_name):
     """
     Saves one or more profiles' data to Excel.
     - If the file doesn't exist, creates it with headers.
     - If it exists, appends new profiles only (avoids duplicates).
-    
+
     Parameters:
         data (dict or list of dict): Single profile dict or list of profile dicts.
         file_path (str): Path to the Excel file.
@@ -56,9 +57,7 @@ def save_data_to_excel(data, file_path, table_name):
 
         table = Table(displayName=table_name, ref=table_range)
         style = TableStyleInfo(
-            name="TableStyleMedium9",
-            showRowStripes=True,
-            showColumnStripes=False
+            name="TableStyleMedium9", showRowStripes=True, showColumnStripes=False
         )
         table.tableStyleInfo = style
         ws.add_table(table)
