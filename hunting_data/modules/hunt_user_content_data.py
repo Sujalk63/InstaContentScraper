@@ -6,12 +6,16 @@ from utilities.load_done_status import load_done_status
 from utilities.save_to_excel import save_data_to_excel
 from hunting_data.modules.hunt_profile_data_functions import *
 from hunting_data.modules.hunt_content_data_functions import *
+from username_scraping.modules.scrape_usernames_from_explore import next_button_click
+from username_scraping.modules.scrape_usernames_from_explore import click_post
+import time 
 
 
 def scrape_content(driver, usernames=None, batch_size=100):
+
     # Handle all three input cases
     if usernames is None:
-        df = pd.read_excel("dummy_usernames.xlsx")  # later usernames
+        df = pd.read_excel("usernames_dummy.xlsx")  # later usernames
         usernames_list = df["Username"].dropna().unique().tolist()
     elif isinstance(usernames, str):
         usernames_list = [usernames.strip()]
@@ -73,7 +77,7 @@ def scrape_content(driver, usernames=None, batch_size=100):
 
 
 def fetch_content_data(driver, username):
-    # print("working from fetch")
+
     url = f"https://www.instagram.com/{username}/"
 
     try:
@@ -84,46 +88,30 @@ def fetch_content_data(driver, username):
     except Exception as e:
         print(f"❌ Profile page did not load properly for {username}: {e}")
         return None
-    
+
     data = {
         "username": username,
-        "posts": [],
-        "reels": [],
+        "content": [],
     }
 
-    huntPost(driver, username, data)
-    huntReel(driver, username, data)
-    
+    click_post(driver)
+
+    while True:
+        prev_url = driver.current_url
+        # Extract the content data for the current post
+        huntContent(driver, username, data)
+
+        # Try to click the next button
+        try:
+            time.sleep(2)
+            next_button_click(driver)
+            WebDriverWait(driver, 10).until(EC.url_changes(prev_url))
+        except Exception as e:
+            print(f"❌ No more posts or failed to click next: {e}")
+            break
+
+    print(data)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames
-#     mark_done(username, "is_content_data_fetched", excel_path)
+def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames
+    mark_done(username, "is_content_data_fetched", excel_path)
