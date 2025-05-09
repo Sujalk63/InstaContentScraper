@@ -14,11 +14,11 @@ driver = login_to_instagram()
 
 try:
     driver.maximize_window()
-    
+
     print("\nWhat would you like to do?")
     print("1. Scrape Usernames")
     print("2. Hunt User Data (Profile + Content)")
-    
+
     task_choice = input("Enter your choice (1 or 2): ").strip()
 
     if task_choice == "1":
@@ -74,11 +74,8 @@ finally:
 #     # Choose task phase
 #     scrape_usernames_from_explore(driver)  # Scraping usernames via explore page
 #     # scrape_usernames_from_reels(driver)      # Scraping usernames via reel section
-    
+
 
 # finally:
 #     input("Press Enter to close the browser...")  # Give the user time to inspect the browser
 #     driver.quit()  # Ensure the driver quits even if there was an error
-
-
-

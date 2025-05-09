@@ -13,9 +13,9 @@ def hunt_user_data(driver):
     print("\nChoose an option to hunt user data:")
     print("1. Hunt Profile level Data")
     print("2. Hunt Content level Data")
-    
+
     choice = input("Enter your choice (1 or 2): ").strip()
-    
+
     if choice == "1":
         print("\nHunting user profile level data...\n")
         scrape_profiles(driver)
