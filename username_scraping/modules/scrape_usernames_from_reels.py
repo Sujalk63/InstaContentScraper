@@ -13,10 +13,11 @@ count = 0
 
 # Function to scrape usernames from reels
 def scrape_usernames_from_reels(
-    driver,
+    driver, batch_size=101
 ):  # when fetching usernames from reels the browser need to be opened
 
-    usernames = []
+    # usernames = []
+    batch_usernames = []
     global count
 
     try:
@@ -34,12 +35,14 @@ def scrape_usernames_from_reels(
 
             username = fetch_username(driver)
             if username:
-                if username not in usernames:
-                    usernames.append(username)
+                if username not in batch_usernames:
+                    batch_usernames.append(username)
                     print(f"✅Fetched username: {username}")
 
-                    # Save immediately after each new username
-                    save_usernames_to_excel(usernames)
+                    if len(batch_usernames) >= batch_size:
+                        save_usernames_to_excel(batch_usernames)
+                        print("💾 Saved batch of usernames.")
+                        batch_usernames = []  # Reset batch
                 else:
                     print(f"♻️Username '{username}' already scraped. Skipping.")
             else:
@@ -67,7 +70,7 @@ def scrape_usernames_from_reels(
                     let playingTop = null;
 
                     for (const v of videos) {
-                        if (!v.paused) {  
+                        if (!v.paused) {
                             playingTop = v.getBoundingClientRect().top;
                             break;
                         }
@@ -77,18 +80,45 @@ def scrape_usernames_from_reels(
                             v.remove();
                         }
                     }
-            })();              
+            })();
             """
             )
 
-            # videos = driver.find_elements(By.TAG_NAME, "video")
-            # print(f"Total <video> tags on page: {len(videos)}")
+            # driver.execute_script(
+            #     """
+            #     (() => {
+            #         const videos = document.querySelectorAll('video');
+            #         const limit = 4;
+
+            #         if (videos.length > limit) {
+            #             const playing = [...videos].find(v => !v.paused);
+            #             const playingTop = playing?.getBoundingClientRect().top || 0;
+
+            #             for (let i = 0; i < videos.length - limit; i++) {
+            #                 const v = videos[i];
+            #                 if (v.paused && v.getBoundingClientRect().top < playingTop) {
+            #                 v.remove();
+            #                 }
+            #             }
+            #         }
+            #     })();
+            #     """
+            # )
+
+            videos = driver.find_elements(By.TAG_NAME, "video")
+            print(f"Total <video> tags on page: {len(videos)}")
 
     except KeyboardInterrupt:
         print("⛔ Stopped by user manually!")
 
     except Exception as e:
         print(f"❌: {e}")
+
+    finally:
+        # Save any remaining usernames in the batch if it wasn't saved earlier
+        if batch_usernames:
+            save_usernames_to_excel(batch_usernames)
+            print("💾 Saved remaining usernames in final batch.")
 
 
 def fetch_username(driver):
@@ -134,9 +164,9 @@ def fetch_username(driver):
         return None
 
 
-def save_usernames_to_excel(usernames):
-    if usernames:
-        df_new = pd.DataFrame(usernames, columns=["Username"])
+def save_usernames_to_excel(batch_usernames):
+    if batch_usernames:
+        df_new = pd.DataFrame(batch_usernames, columns=["Username"])
 
         if os.path.exists("usernames_dummy.xlsx"):
             df_existing = pd.read_excel("usernames_dummy.xlsx")
