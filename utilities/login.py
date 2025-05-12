@@ -18,6 +18,7 @@ def load_cookies(driver, path=COOKIES_PATH):
         cookies = json.load(file)
     for cookie in cookies:
         driver.add_cookie(cookie) # putting cookies to the browsers memory
+    return cookies
         
         
 

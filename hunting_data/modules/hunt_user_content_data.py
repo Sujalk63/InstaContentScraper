@@ -44,7 +44,7 @@ def scrape_content(driver, usernames=None, batch_size=100):
 
             if data is None:
                 print(f"⚠️ {username} changed or deleted")
-                mark_profile_done(username)
+                # mark_profile_done(username)
                 continue
 
             content_data_batch.append(data)
@@ -96,7 +96,10 @@ def fetch_content_data(driver, username):
 
     click_post(driver)
 
-    while True:
+    n = 0
+
+    while n<=5:
+        n = n+1
         prev_url = driver.current_url
         # Extract the content data for the current post
         huntContent(driver, username, data)
@@ -110,7 +113,7 @@ def fetch_content_data(driver, username):
             print(f"❌ No more posts or failed to click next: {e}")
             break
 
-    print(data)
+    print(data["content"])
 
 
 def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames
