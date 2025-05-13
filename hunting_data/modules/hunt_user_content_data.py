@@ -98,7 +98,7 @@ def fetch_content_data(driver, username):
 
     n = 0
 
-    while n<=5:
+    while n<=7:
         n = n+1
         prev_url = driver.current_url
         # Extract the content data for the current post
