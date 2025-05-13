@@ -59,12 +59,14 @@ def huntContent(driver, username, data):
         content_data["mentions_count"] = caption_mentions_hastags["mentions_count"]
 
         # Audio 
-        audio_info = fetch_audio_info(driver)
-        content_data["audio_used"] = audio_info["audio_used"]
-        content_data["is_trending_audio"] = audio_info["is_trending_audio"]
+        header_info = fetch_top_header_info(driver)
+        content_data["audio_used"] = header_info["audio_used"]
+        content_data["post_context"] = header_info["post_context"]
+        content_data["paid_partnership"] = header_info["paid_partnership"]
 
-        print(content_data["audio_used"])
-        print(content_data["is_trending_audio"])
+        print("Audio:", content_data["audio_used"])
+        print("post_context:", content_data["post_context"])
+        print("partnership:", content_data["paid_partnership"])
 
 
 
@@ -244,40 +246,62 @@ def fetch_caption_mentions_hastags(caption_text):
             "mentions_count": 0
         }
     
-def fetch_audio_info(driver):
+def fetch_top_header_info(driver):
     try:
         article_existence(driver)
 
-        # Wait for audio section anchor
-        audio_section = WebDriverWait(driver, t).until(
-            EC.presence_of_element_located((By.XPATH, "//article//a[contains(@href, '/audio/')]"))
+        header_elem = WebDriverWait(driver, t).until(
+            EC.presence_of_element_located((By.XPATH, "//article//header"))
         )
 
-        # Extract audio name (text inside span)
+        # Start defaults
+        post_context = None
+        paid_partnership = None
+        audio_used = None
+
+        # --- 1. Audio Info ---
         try:
-            audio_name_elem = audio_section.find_element(By.XPATH, ".//span")
-            audio_used = audio_name_elem.text.strip()
+            # Audio is often at the bottom or near play bar
+            audio_elem = WebDriverWait(driver, t).until(
+                EC.presence_of_element_located((By.XPATH, "//div//a[contains(@href, '/reels/audio/')]"))
+            )
+            audio_text = audio_elem.text.strip()
+
+            if "original audio" in audio_text.lower():
+                audio_used = "original"
+            elif audio_text:
+                audio_used = audio_text
         except:
             audio_used = None
 
-        # Check for trending icon (usually has aria-label='Trending')
+        # --- 2. Location (top header clickable link) ---
         try:
-            trending_icon = audio_section.find_element(By.XPATH, ".//svg[@aria-label='Trending']")
-            is_trending_audio = True
+            post_context = header_elem.find_element(By.XPATH, ".//div[@dir='auto']//a")
+            post_context = post_context.text.strip()
         except:
-            is_trending_audio = False
+            post_context = None
+
+        # --- 3. Paid Partnership (usually a span element with text like "Paid partnership with") ---
+        try:
+            partnership_elem = header_elem.find_element(By.XPATH, ".//span[contains(text(), 'Paid partnership')]")
+            paid_partnership = partnership_elem.text.strip()
+        except:
+            paid_partnership = None
 
         return {
             "audio_used": audio_used,
-            "is_trending_audio": is_trending_audio
+            "post_context": post_context,
+            "paid_partnership": paid_partnership
         }
 
     except Exception as e:
-        print(f"❌ Failed to fetch audio info: {e}")
+        print(f"❌ Failed to fetch top header info: {e}")
         return {
             "audio_used": None,
-            "is_trending_audio": False
+            "post_context": None,
+            "paid_partnership": None
         }
+
 
 
 def parse_posted_time_details(posted_time_iso):
@@ -314,7 +338,8 @@ def build_content_template():
         "all_mentions": [],
         "mentions_count": 0,
         "audio_used": None,
-        "is_trending_audio": False,
+        "location": None,
+        "paid_partnership": None,
         "likes_count": None,
         "comments_count": None,
         "views_count": None,
