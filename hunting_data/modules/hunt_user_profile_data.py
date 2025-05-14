@@ -9,7 +9,7 @@ from utilities.save_to_excel import save_data_to_excel
 from utilities.load_done_status import load_done_status
 
 
-def scrape_profiles(driver, usernames=None, batch_size=5):
+def scrape_profiles(driver, usernames=None, batch_size=100):
     # print("working")
     """
     Scrapes Instagram profile data.
