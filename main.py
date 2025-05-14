@@ -1,10 +1,8 @@
 # save cookies style
-import os
 from dotenv import load_dotenv
 from utilities.login import login_to_instagram
-from username_scraping.scrape_usernames import scrape_username
-from hunting_data.modules.hunt_user_profile_data import scrape_profiles
 from hunting_data.hunt_user_data import hunt_user_data
+from username_scraping.scrape_usernames import scrape_username
 
 load_dotenv()
 
@@ -35,7 +33,9 @@ finally:
     driver.quit()
 
 
-# shreyasmendiratta 0
+# stakegtoast
+# official_mohammad_kaif_
+# mrinal_tiwari_ 4348
 
 
 # without using cookie

@@ -16,32 +16,37 @@ def save_data_to_excel(data, file_path, table_name):
         file_path (str): Path to the Excel file.
     """
     # Normalize input to list of dicts
-    if isinstance(data, dict):
-        data = [data]
-    elif not isinstance(data, list) or not all(isinstance(d, dict) for d in data):
-        print("❌ Invalid data format. Must be dict or list of dicts.")
-        return
-
-    new_df = pd.DataFrame(data)
-
-    if not os.path.exists(file_path):
-        # File doesn't exist: create new
-        new_df.to_excel(file_path, index=False)
-        print(f"✅ Created new file and saved {len(data)} profile(s).")
-    else:
-        # File exists: read and append non-duplicate data
-        existing_df = pd.read_excel(file_path)
-
-        # Filter out profiles that already exist based on Username
-        new_df = new_df[~new_df["Username"].isin(existing_df["Username"])]
-
-        if new_df.empty:
-            print("⚠️ All usernames already exist in file. Skipping save.")
+    try:
+        if isinstance(data, dict):
+            data = [data]
+        elif not isinstance(data, list) or not all(isinstance(d, dict) for d in data):
+            print("❌ Invalid data format. Must be dict or list of dicts.")
             return
 
-        updated_df = pd.concat([existing_df, new_df], ignore_index=True)
-        updated_df.to_excel(file_path, index=False)
-        print(f"✅ Appended {len(new_df)} new profile(s) to existing file.")
+        new_df = pd.DataFrame(data)
+
+        if not os.path.exists(file_path):
+            # File doesn't exist: create new
+            new_df.to_excel(file_path, index=False)
+            print(f"✅ Created new file and saved {len(data)} profile(s).")
+        else:
+            # File exists: read and append non-duplicate data
+            existing_df = pd.read_excel(file_path)
+
+            # Filter out profiles that already exist based on Username
+            new_df = new_df[~new_df["Username"].isin(existing_df["Username"])]
+
+            if new_df.empty:
+                print("⚠️ All usernames already exist in file. Skipping save.")
+                return
+
+            updated_df = pd.concat([existing_df, new_df], ignore_index=True)
+            updated_df.to_excel(file_path, index=False)
+            print(f"✅ Appended {len(new_df)} new profile(s) to existing file.")
+    
+    except Exception as e:
+        print(f"❌ Error Saving the batch to excel: {e}")
+
 
     # Format Excel sheet as a styled table
     try:

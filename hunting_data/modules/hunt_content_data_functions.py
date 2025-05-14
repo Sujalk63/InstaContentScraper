@@ -1,19 +1,15 @@
+import html
+from math import gcd
+from datetime import datetime
+from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import pandas as pd
-from math import gcd
-import html
-from datetime import datetime
-from utilities.load_done_status import load_done_status
-from utilities.save_to_excel import save_data_to_excel
 from hunting_data.modules.hunt_profile_data_functions import *
 from hunting_data.modules.hunt_content_data_functions import *
-from username_scraping.modules.scrape_usernames_from_explore import click_post
-from urllib.parse import urlparse
-import math
+from selenium.webdriver.support import expected_conditions as EC
 
 t = 1
+
 
 def huntContent(driver, username, data):
 
@@ -52,13 +48,15 @@ def huntContent(driver, username, data):
         content_data["caption_length"] = caption_data["character_count"]
         content_data["no_of_line_changes"] = caption_data["br_count"]
 
-        caption_mentions_hastags = fetch_caption_mentions_hastags(content_data["caption_text"])
+        caption_mentions_hastags = fetch_caption_mentions_hastags(
+            content_data["caption_text"]
+        )
         content_data["hashtags_used"] = caption_mentions_hastags["hashtags_used"]
         content_data["hashtag_count"] = caption_mentions_hastags["hashtag_count"]
         content_data["all_mentions"] = caption_mentions_hastags["all_mentions"]
         content_data["mentions_count"] = caption_mentions_hastags["mentions_count"]
 
-        # Audio 
+        # Audio
         header_info = fetch_top_header_info(driver)
         content_data["audio_used"] = header_info["audio_used"]
         content_data["post_context"] = header_info["post_context"]
@@ -67,11 +65,6 @@ def huntContent(driver, username, data):
         print("Audio:", content_data["audio_used"])
         print("post_context:", content_data["post_context"])
         print("partnership:", content_data["paid_partnership"])
-
-
-
-
-
 
         if "content" not in data:
             data["content"] = []
@@ -145,7 +138,6 @@ def fetch_video_duration(driver):
     except Exception as e:
         print("Error fetching video duration:", e)
         return None
-    
 
 
 def fetch_aspect_ratio(driver):
@@ -180,12 +172,14 @@ def fetch_aspect_ratio(driver):
         return None
 
 
-def fetch_caption_text(driver): 
+def fetch_caption_text(driver):
     try:
         article_existence(driver)
 
         h1_elem = WebDriverWait(driver, t).until(
-            EC.presence_of_element_located((By.XPATH, "//article//div//h1[@dir='auto']"))
+            EC.presence_of_element_located(
+                (By.XPATH, "//article//div//h1[@dir='auto']")
+            )
         )
 
         raw_html = h1_elem.get_attribute("innerHTML")
@@ -200,7 +194,7 @@ def fetch_caption_text(driver):
         html_with_spaces = html.unescape(html_with_spaces)
 
         # Remove all tags but keep inner text of <a> and normal text
-        text_only = re.sub(r'<[^>]+>', '', html_with_spaces)
+        text_only = re.sub(r"<[^>]+>", "", html_with_spaces)
 
         # Final clean text
         final_text = text_only.strip()
@@ -211,31 +205,27 @@ def fetch_caption_text(driver):
         return {
             "text": final_text,
             "br_count": br_count,
-            "character_count": total_characters
+            "character_count": total_characters,
         }
 
     except Exception as e:
         print(f"❌ Failed to fetch caption: {e}")
-        return {
-            "text": None,
-            "br_count": 0,
-            "character_count": 0
-        }
+        return {"text": None, "br_count": 0, "character_count": 0}
 
 
 def fetch_caption_mentions_hastags(caption_text):
     try:
         # Extract hashtags (e.g., #parentingtips)
-        hashtags = re.findall(r'#\w+', caption_text)
-        
+        hashtags = re.findall(r"#\w+", caption_text)
+
         # Extract mentions (e.g., @sujalK)
-        mentions = re.findall(r'@\w+', caption_text)
-        
+        mentions = re.findall(r"@\w+", caption_text)
+
         return {
             "hashtags_used": hashtags,
             "hashtag_count": len(hashtags),
             "all_mentions": mentions,
-            "mentions_count": len(mentions)
+            "mentions_count": len(mentions),
         }
     except Exception as e:
         print(f"❌ Failed to extract hashtags and mentions: {e}")
@@ -243,9 +233,10 @@ def fetch_caption_mentions_hastags(caption_text):
             "hashtags_used": [],
             "hashtag_count": 0,
             "all_mentions": [],
-            "mentions_count": 0
+            "mentions_count": 0,
         }
-    
+
+
 def fetch_top_header_info(driver):
     try:
         article_existence(driver)
@@ -263,7 +254,9 @@ def fetch_top_header_info(driver):
         try:
             # Audio is often at the bottom or near play bar
             audio_elem = WebDriverWait(driver, t).until(
-                EC.presence_of_element_located((By.XPATH, "//div//a[contains(@href, '/reels/audio/')]"))
+                EC.presence_of_element_located(
+                    (By.XPATH, "//div//a[contains(@href, '/reels/audio/')]")
+                )
             )
             audio_text = audio_elem.text.strip()
 
@@ -283,7 +276,9 @@ def fetch_top_header_info(driver):
 
         # --- 3. Paid Partnership (usually a span element with text like "Paid partnership with") ---
         try:
-            partnership_elem = header_elem.find_element(By.XPATH, ".//span[contains(text(), 'Paid partnership')]")
+            partnership_elem = header_elem.find_element(
+                By.XPATH, ".//span[contains(text(), 'Paid partnership')]"
+            )
             paid_partnership = partnership_elem.text.strip()
         except:
             paid_partnership = None
@@ -291,26 +286,21 @@ def fetch_top_header_info(driver):
         return {
             "audio_used": audio_used,
             "post_context": post_context,
-            "paid_partnership": paid_partnership
+            "paid_partnership": paid_partnership,
         }
 
     except Exception as e:
         print(f"❌ Failed to fetch top header info: {e}")
-        return {
-            "audio_used": None,
-            "post_context": None,
-            "paid_partnership": None
-        }
-
+        return {"audio_used": None, "post_context": None, "paid_partnership": None}
 
 
 def parse_posted_time_details(posted_time_iso):
     try:
         dt = datetime.strptime(posted_time_iso, "%Y-%m-%dT%H:%M:%S.000Z")
 
-        day_of_week = dt.strftime("%A")         # 'Monday', 'Tuesday', etc.
-        hour_of_day = dt.hour                   # 0 to 23
-        time_am_pm = dt.strftime("%I:%M %p")    # '03:32 PM'
+        day_of_week = dt.strftime("%A")  # 'Monday', 'Tuesday', etc.
+        hour_of_day = dt.hour  # 0 to 23
+        time_am_pm = dt.strftime("%I:%M %p")  # '03:32 PM'
 
         return day_of_week, hour_of_day, time_am_pm
     except Exception as e:

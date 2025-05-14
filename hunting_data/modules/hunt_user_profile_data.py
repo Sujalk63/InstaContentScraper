@@ -9,7 +9,7 @@ from utilities.save_to_excel import save_data_to_excel
 from utilities.load_done_status import load_done_status
 
 
-def scrape_profiles(driver, usernames=None, batch_size=100):
+def scrape_profiles(driver, usernames=None, batch_size=5):
     # print("working")
     """
     Scrapes Instagram profile data.
@@ -48,8 +48,10 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
                 continue
 
             profile_data_batch.append(data)
+            
 
             if len(profile_data_batch) >= batch_size:
+                print("inside if")
                 save_data_to_excel(
                     profile_data_batch,
                     file_path="usernames_profile_data.xlsx",
