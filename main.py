@@ -8,7 +8,6 @@ load_dotenv()
 
 # Get logged-in driver (with cookies or manual login if first time)
 driver = login_to_instagram()
-# print(f"printing driver: {driver}")
 
 
 try:
@@ -24,17 +23,13 @@ try:
     if task_choice == "1":
         scrape_username(driver)
     elif task_choice == "2":
-        # You’ll define this next,
         hunt_user_data(driver)
-        # scrape_profiles(driver)
     else:
         print("Invalid choice. Please enter 1 or 2.")
 
 finally:
     input("Press Enter to close the browser...")
     driver.quit()
-
-
 
 
 # without using cookie

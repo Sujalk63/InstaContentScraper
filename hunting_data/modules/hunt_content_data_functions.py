@@ -1,4 +1,5 @@
 import html
+import pytz
 from math import gcd
 from datetime import datetime
 from urllib.parse import urlparse
@@ -19,37 +20,46 @@ def huntContent(driver, username, data):
 
         # # post type
         content_data["post_type"] = fetch_post_type(driver)
-        print("post type", content_data["post_type"])
+        print("Post type:", content_data["post_type"])
 
         # content id
         content_data["content_id"] = fetch_content_id(driver)
-        print("Content id", content_data["content_id"])
+        print("Content id:", content_data["content_id"])
 
         # post time
         content_data["posted_time_details"] = fetch_posted_time(driver)
-        print("posted time details",content_data["posted_time_details"])
-        day, hour, time_str = parse_posted_time_details(content_data["posted_time_details"])
+        print("Posted time details:", content_data["posted_time_details"])
+        day, hour, time_str = parse_posted_time_details(
+            content_data["posted_time_details"]
+        )
         content_data["day_of_week"] = day
         content_data["hour_of_day"] = hour
         content_data["time_am_pm"] = time_str
-        print(content_data["day_of_week"], content_data["hour_of_day"], content_data["time_am_pm"])
+        print(
+            "Day:",
+            content_data["day_of_week"],
+            "Hour:",
+            content_data["hour_of_day"],
+            "Time:",
+            content_data["time_am_pm"],
+        )
 
         # video duration
         content_data["video_duration"] = fetch_video_duration(driver)
-        print(content_data["video_duration"])
+        print("video duration", content_data["video_duration"])
 
         # aspect ratio
         content_data["aspect_ratio"] = fetch_aspect_ratio(driver)
-        print(content_data["aspect_ratio"])
+        print("Aspect ratio", content_data["aspect_ratio"])
 
         # caption data
         caption_data = fetch_caption_text(driver)
         content_data["caption_text"] = caption_data["text"]
         content_data["caption_length"] = caption_data["character_count"]
         content_data["no_of_line_changes"] = caption_data["br_count"]
-        print("text",content_data["caption_text"])
-        print("length",content_data["caption_length"])
-        print("no of lines",content_data["no_of_line_changes"])
+        print("Text:", content_data["caption_text"])
+        print("Length of caption:", content_data["caption_length"])
+        print("No of lines changes:", content_data["no_of_line_changes"])
 
         caption_mentions_hastags = fetch_caption_mentions_hastags(
             content_data["caption_text"]
@@ -58,31 +68,32 @@ def huntContent(driver, username, data):
         content_data["hashtag_count"] = caption_mentions_hastags["hashtag_count"]
         content_data["all_mentions"] = caption_mentions_hastags["all_mentions"]
         content_data["mentions_count"] = caption_mentions_hastags["mentions_count"]
-        print("hastags",content_data["hashtags_used"])
-        print("hastag count",content_data["hashtag_count"])
-        print("all_mentions",content_data["all_mentions"])
-        print("mentions_count",content_data["mentions_count"])
+        print("Hastags", content_data["hashtags_used"])
+        print("Hastag count", content_data["hashtag_count"])
+        print("All mentions", content_data["all_mentions"])
+        print("Mentions count", content_data["mentions_count"])
 
         # Audio
         header_info = fetch_top_header_info(driver)
         content_data["audio_used"] = header_info["audio_used"]
         content_data["post_context"] = header_info["post_context"]
         content_data["paid_partnership"] = header_info["paid_partnership"]
+        print("Audio used:", content_data["audio_used"])
+        print("Post context:", content_data["post_context"])
+        print("Partnership:", content_data["paid_partnership"])
 
         engagement_metrics = fetch_engagement_metrics(driver)
-
         content_data["likes_count"] = engagement_metrics["likes_count"]
         content_data["comments_count"] = engagement_metrics["comments_count"]
-        content_data["views_count"] = engagement_metrics["views_count"]
-        content_data["saves"] = engagement_metrics["saves"]
-        content_data["shares"] = engagement_metrics["shares"]
+        # content_data["views_count"] = engagement_metrics["views_count"]
+        # content_data["saves"] = engagement_metrics["saves"]
+        # content_data["shares"] = engagement_metrics["shares"]
 
         print("Like count:", content_data["likes_count"])
-        # print("comments count:",content_data["comments_count"])
-        # print("views count:",content_data["views_count"])
-        # print("saves count:",content_data["saves"])
-        # print("shares count:",content_data["shares"])
-
+        print("Comments count:", content_data["comments_count"])
+        # print("Views count:",content_data["views_count"])
+        # print("Saves count:",content_data["saves"])
+        # print("Shares count:",content_data["shares"])
 
         if "content" not in data:
             data["content"] = []
@@ -154,7 +165,6 @@ def fetch_video_duration(driver):
         else:
             return "00:00"
     except Exception as e:
-        print("Error fetching video duration:", e)
         return None
 
 
@@ -310,7 +320,8 @@ def fetch_top_header_info(driver):
     except Exception as e:
         print(f"❌ Failed to fetch top header info: {e}")
         return {"audio_used": None, "post_context": None, "paid_partnership": None}
-    
+
+
 def fetch_engagement_metrics(driver):
     try:
         WebDriverWait(driver, 10).until(
@@ -321,8 +332,7 @@ def fetch_engagement_metrics(driver):
         likes = None
         try:
             like_elem = driver.find_element(
-                By.XPATH,
-                "//article//section//span[contains(@class, 'html-span')]"
+                By.XPATH, "//article//section//span[contains(@class, 'html-span')]"
             )
             like_text = like_elem.text.strip()
             if re.search(r"\d", like_text):
@@ -330,12 +340,44 @@ def fetch_engagement_metrics(driver):
         except:
             likes = None
 
+        # --- comments Count ---
+        comments = None
+        try:
+            # comment_elem = driver.find_element(
+            #     By.XPATH, "//a[contains(@href, '/comments/')]/span/span"
+            # )
+            # comment_text = comment_elem.text.strip()
+            # print("text of comment:", comment_text)
+            # if re.search(r"\d", comment_text):
+            #     comments = convert_to_number(re.findall(r"\d[\d.,KMB]*", comment_text)[0])
+            comment_link_elem = driver.find_element(
+                By.XPATH, "//a[contains(@href, '/comments/')]"
+            )
+
+            # Try to find inner <span> if it exists (for multiple comments like: "View all 33 comments")
+            try:
+                inner_span = comment_link_elem.find_element(By.XPATH, ".//span/span")
+                comment_text = inner_span.text.strip()
+            except:
+                # Fallback: Only one comment, use outer <span>
+                outer_span = comment_link_elem.find_element(By.XPATH, ".//span")
+                comment_text = outer_span.text.strip()
+
+            print(f"Extracted comment text: {comment_text}")
+
+            # Extract number from text like "View 1 comment", "View all 33 comments"
+            match = re.search(r"\d[\d.,KMB]*", comment_text)
+            if match:
+                comments = convert_to_number(match.group())
+        except:
+            comments = None
+
         return {
             "likes_count": likes,
-            "comments_count": None,
-            "views_count": None,
-            "saves": None,
-            "shares": None,
+            "comments_count": comments,
+            # "views_count": None,
+            # "saves": None,
+            # "shares": None,
         }
 
     except Exception as e:
@@ -343,19 +385,25 @@ def fetch_engagement_metrics(driver):
         return {
             "likes_count": None,
             "comments_count": None,
-            "views_count": None,
-            "saves": None,
-            "shares": None,
+            # "views_count": None,
+            # "saves": None,
+            # "shares": None,
         }
 
 
 def parse_posted_time_details(posted_time_iso):
     try:
-        dt = datetime.strptime(posted_time_iso, "%Y-%m-%dT%H:%M:%S.000Z")
+        # Step 1: Parse original ISO timestamp in UTC
+        utc_time = datetime.strptime(posted_time_iso, "%Y-%m-%dT%H:%M:%S.000Z")
+        utc_time = utc_time.replace(tzinfo=pytz.UTC)
 
-        day_of_week = dt.strftime("%A")  # 'Monday', 'Tuesday', etc.
-        hour_of_day = dt.hour  # 0 to 23
-        time_am_pm = dt.strftime("%I:%M %p")  # '03:32 PM'
+        # Step 2: Convert to IST
+        ist = pytz.timezone("Asia/Kolkata")
+        ist_time = utc_time.astimezone(ist)
+
+        day_of_week = ist_time.strftime("%A")
+        hour_of_day = ist_time.hour
+        time_am_pm = ist_time.strftime("%I:%M %p")
 
         return day_of_week, hour_of_day, time_am_pm
     except Exception as e:
@@ -387,7 +435,7 @@ def build_content_template():
         "paid_partnership": None,
         "likes_count": None,
         "comments_count": None,
-        "views_count": None,
-        "saves": None,
-        "shares": None,
+        # "views_count": None,
+        # "saves": None,
+        # "shares": None,
     }
