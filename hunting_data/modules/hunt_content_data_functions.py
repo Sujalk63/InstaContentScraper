@@ -19,34 +19,37 @@ def huntContent(driver, username, data):
 
         # # post type
         content_data["post_type"] = fetch_post_type(driver)
-        # print(content_data["post_type"])
+        print("post type", content_data["post_type"])
 
-        # # content id
-        # content_data["content_id"] = fetch_content_id(driver)
-        # print(content_data["content_id"])
+        # content id
+        content_data["content_id"] = fetch_content_id(driver)
+        print("Content id", content_data["content_id"])
 
-        # # post time
-        # content_data["posted_time_details"] = fetch_posted_time(driver)
-        # print(content_data["posted_time_details"])
-        # day, hour, time_str = parse_posted_time_details(content_data["posted_time_details"])
-        # content_data["day_of_week"] = day
-        # content_data["hour_of_day"] = hour
-        # content_data["time_am_pm"] = time_str
-        # print(content_data["day_of_week"], content_data["hour_of_day"], content_data["time_am_pm"])
+        # post time
+        content_data["posted_time_details"] = fetch_posted_time(driver)
+        print("posted time details",content_data["posted_time_details"])
+        day, hour, time_str = parse_posted_time_details(content_data["posted_time_details"])
+        content_data["day_of_week"] = day
+        content_data["hour_of_day"] = hour
+        content_data["time_am_pm"] = time_str
+        print(content_data["day_of_week"], content_data["hour_of_day"], content_data["time_am_pm"])
 
-        # # video duration
-        # content_data["video_duration"] = fetch_video_duration(driver)
-        # print(content_data["video_duration"])
+        # video duration
+        content_data["video_duration"] = fetch_video_duration(driver)
+        print(content_data["video_duration"])
 
-        # # aspect ratio
-        # content_data["aspect_ratio"] = fetch_aspect_ratio(driver)
-        # print(content_data["aspect_ratio"])
+        # aspect ratio
+        content_data["aspect_ratio"] = fetch_aspect_ratio(driver)
+        print(content_data["aspect_ratio"])
 
         # caption data
         caption_data = fetch_caption_text(driver)
         content_data["caption_text"] = caption_data["text"]
         content_data["caption_length"] = caption_data["character_count"]
         content_data["no_of_line_changes"] = caption_data["br_count"]
+        print("text",content_data["caption_text"])
+        print("length",content_data["caption_length"])
+        print("no of lines",content_data["no_of_line_changes"])
 
         caption_mentions_hastags = fetch_caption_mentions_hastags(
             content_data["caption_text"]
@@ -55,6 +58,10 @@ def huntContent(driver, username, data):
         content_data["hashtag_count"] = caption_mentions_hastags["hashtag_count"]
         content_data["all_mentions"] = caption_mentions_hastags["all_mentions"]
         content_data["mentions_count"] = caption_mentions_hastags["mentions_count"]
+        print("hastags",content_data["hashtags_used"])
+        print("hastag count",content_data["hashtag_count"])
+        print("all_mentions",content_data["all_mentions"])
+        print("mentions_count",content_data["mentions_count"])
 
         # Audio
         header_info = fetch_top_header_info(driver)
@@ -62,9 +69,20 @@ def huntContent(driver, username, data):
         content_data["post_context"] = header_info["post_context"]
         content_data["paid_partnership"] = header_info["paid_partnership"]
 
-        print("Audio:", content_data["audio_used"])
-        print("post_context:", content_data["post_context"])
-        print("partnership:", content_data["paid_partnership"])
+        engagement_metrics = fetch_engagement_metrics(driver)
+
+        content_data["likes_count"] = engagement_metrics["likes_count"]
+        content_data["comments_count"] = engagement_metrics["comments_count"]
+        content_data["views_count"] = engagement_metrics["views_count"]
+        content_data["saves"] = engagement_metrics["saves"]
+        content_data["shares"] = engagement_metrics["shares"]
+
+        print("Like count:", content_data["likes_count"])
+        # print("comments count:",content_data["comments_count"])
+        # print("views count:",content_data["views_count"])
+        # print("saves count:",content_data["saves"])
+        # print("shares count:",content_data["shares"])
+
 
         if "content" not in data:
             data["content"] = []
@@ -292,6 +310,43 @@ def fetch_top_header_info(driver):
     except Exception as e:
         print(f"❌ Failed to fetch top header info: {e}")
         return {"audio_used": None, "post_context": None, "paid_partnership": None}
+    
+def fetch_engagement_metrics(driver):
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//article"))
+        )
+
+        # --- Likes Count ---
+        likes = None
+        try:
+            like_elem = driver.find_element(
+                By.XPATH,
+                "//article//section//span[contains(@class, 'html-span')]"
+            )
+            like_text = like_elem.text.strip()
+            if re.search(r"\d", like_text):
+                likes = convert_to_number(re.findall(r"\d[\d.,KMB]*", like_text)[0])
+        except:
+            likes = None
+
+        return {
+            "likes_count": likes,
+            "comments_count": None,
+            "views_count": None,
+            "saves": None,
+            "shares": None,
+        }
+
+    except Exception as e:
+        print(f"❌ Failed to fetch engagement metrics: {e}")
+        return {
+            "likes_count": None,
+            "comments_count": None,
+            "views_count": None,
+            "saves": None,
+            "shares": None,
+        }
 
 
 def parse_posted_time_details(posted_time_iso):
@@ -336,12 +391,3 @@ def build_content_template():
         "saves": None,
         "shares": None,
     }
-
-
-# https://scontent.cdninstagram.com/v/t51.71878-15/496360173_1393321048749845_8137806010030375186_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&ig_cache_key=MzYyOTQwNDYyNDU5NzYwMTM4MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&_nc_ohc=RUB3m5s14zgQ7kNvwHuiCz4&_nc_oc=AdnWanqWlDpGmi9ZNVN8UZ3HXnOonym_aoDMrKLNP6MWADTtSNDER589piC9gbMqjIRwAayZBehbHQxzJHckiUvg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&_nc_gid=g2agS6wxIgDcPcrjRBWomw&oh=00_AfLASXHsCq1KYrBL5Dn8e6Z6i_G989rfz4DY0a-9sqoJeQ&oe=6827ACEF
-
-# https://scontent.cdninstagram.com/v/t51.75761-15/485878527_17933183910007501_3479559491525146137_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=108&ig_cache_key=MzU5MzI3NjYzNTk1NDk1ODc0NDE3OTMzMTgzOTA0MDA3NTAx.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&_nc_ohc=wNwYxwpZkh8Q7kNvwF2iIkz&_nc_oc=AdlUYUUQ1mYakdDxHcuzZQbRBbUjKO3vl5KSoBQQLVLhfpcoC9irZpnpcOz6ytK75IX7bvYPtfrmYYnKSoZENQYG&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&_nc_gid=Rp-n8mTZskL5neJvNoAaaw&oh=00_AfKVpZbF3_J27a4lYXFkEjd892OvuJuFVEA57dYAtYzoYA&oe=6827A83D
-
-# https://scontent.cdninstagram.com/v/t51.75761-15/486288920_17933180487007501_5600046053478966604_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzU5MDM0OTMxODk3OTAxOTczODE3OTMzMTgwNDg0MDA3NTAx.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&_nc_ohc=-K0axrO-7_gQ7kNvwGo8OS9&_nc_oc=AdllkdPBssChKNk6y5_ladBtzAoUKYlq-mDjnk3x9t2U_KJFMecxiriQDRKpc92Ex4_I3WucJHRhsSedEJgzXs6Z&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&_nc_gid=Rp-n8mTZskL5neJvNoAaaw&oh=00_AfIOfoW-ypsqQA4puScl2g0mXbsniFuMgOZAjcHfl8HCKg&oe=6827BC3C
-
-# https://scontent.cdninstagram.com/v/t51.71878-15/485012378_1407619340648828_1675637164226427015_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=107&ig_cache_key=MzU5MTc3NDAyNDM5MTA4MTkxMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&_nc_ohc=j2MRc8b6B0sQ7kNvwEBQ4Pm&_nc_oc=Adm6dg50yDUSvQ2ACoP5WgVqBveZBExzWCoQiIgFZ7yVFsVUOoDIlfwmPZyZHUo3GFGDHZL1ON_FU4TwiGrwCpvY&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&_nc_gid=Rp-n8mTZskL5neJvNoAaaw&oh=00_AfJzAFvNyH3TU4SZI1Az5uuFktFAv1N3Q1uJ_HnrAJAJ-Q&oe=6827BAC6

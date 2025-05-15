@@ -76,7 +76,9 @@ def scrape_content(driver, usernames=None, batch_size=100):
                 mark_profile_done(profile["Username"])
 
 
-def fetch_content_data(driver, username):
+def fetch_content_data(driver, username): 
+
+
 
     url = f"https://www.instagram.com/{username}/"
 
@@ -98,7 +100,7 @@ def fetch_content_data(driver, username):
 
     n = 0
 
-    while n<=7:
+    while n<=10:
         n = n+1
         prev_url = driver.current_url
         # Extract the content data for the current post
@@ -114,6 +116,7 @@ def fetch_content_data(driver, username):
             break
 
     print(data["content"])
+    return data
 
 
 def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames

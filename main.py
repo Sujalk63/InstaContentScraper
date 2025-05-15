@@ -10,7 +10,9 @@ load_dotenv()
 driver = login_to_instagram()
 # print(f"printing driver: {driver}")
 
+
 try:
+    driver.get("https://www.instagram.com/")
     driver.maximize_window()
 
     print("\nWhat would you like to do?")
@@ -33,9 +35,6 @@ finally:
     driver.quit()
 
 
-# stakegtoast
-# official_mohammad_kaif_
-# mrinal_tiwari_ 4348
 
 
 # without using cookie
@@ -79,3 +78,6 @@ finally:
 # finally:
 #     input("Press Enter to close the browser...")  # Give the user time to inspect the browser
 #     driver.quit()  # Ensure the driver quits even if there was an error
+
+
+# G7v$kR2#tLp9!XeQ
