@@ -21,46 +21,46 @@ def huntContent(driver, username, data):
 
         # # post type
         content_data["post_type"] = fetch_post_type(driver)
-        print("Post type:", content_data["post_type"])
+        # print("Post type:", content_data["post_type"])
 
         # content id
         content_data["content_id"] = fetch_content_id(driver)
-        print("Content id:", content_data["content_id"])
+        # print("Content id:", content_data["content_id"])
 
         # post time
         content_data["posted_time_details"] = fetch_posted_time(driver)
-        print("Posted time details:", content_data["posted_time_details"])
+        # print("Posted time details:", content_data["posted_time_details"])
         day, hour, time_str = parse_posted_time_details(
             content_data["posted_time_details"]
         )
         content_data["day_of_week"] = day
         content_data["hour_of_day"] = hour
         content_data["time_am_pm"] = time_str
-        print(
-            "Day:",
-            content_data["day_of_week"],
-            "Hour:",
-            content_data["hour_of_day"],
-            "Time:",
-            content_data["time_am_pm"],
-        )
+        # print(
+        #     "Day:",
+        #     content_data["day_of_week"],
+        #     "Hour:",
+        #     content_data["hour_of_day"],
+        #     "Time:",
+        #     content_data["time_am_pm"],
+        # )
 
         # video duration
         content_data["video_duration"] = fetch_video_duration(driver)
-        print("video duration", content_data["video_duration"])
+        # print("video duration", content_data["video_duration"])
 
         # aspect ratio
         content_data["aspect_ratio"] = fetch_aspect_ratio(driver)
-        print("Aspect ratio", content_data["aspect_ratio"])
+        # print("Aspect ratio", content_data["aspect_ratio"])
 
         # caption data
         caption_data = fetch_caption_text(driver)
         content_data["caption_text"] = caption_data["text"]
         content_data["caption_length"] = caption_data["character_count"]
         content_data["no_of_line_changes"] = caption_data["br_count"]
-        print("Text:", content_data["caption_text"])
-        print("Length of caption:", content_data["caption_length"])
-        print("No of lines changes:", content_data["no_of_line_changes"])
+        # print("Text:", content_data["caption_text"])
+        # print("Length of caption:", content_data["caption_length"])
+        # print("No of lines changes:", content_data["no_of_line_changes"])
 
         caption_mentions_hastags = fetch_caption_mentions_hastags(
             content_data["caption_text"]
@@ -69,19 +69,19 @@ def huntContent(driver, username, data):
         content_data["hashtag_count"] = caption_mentions_hastags["hashtag_count"]
         content_data["all_mentions"] = caption_mentions_hastags["all_mentions"]
         content_data["mentions_count"] = caption_mentions_hastags["mentions_count"]
-        print("Hastags", content_data["hashtags_used"])
-        print("Hastag count", content_data["hashtag_count"])
-        print("All mentions", content_data["all_mentions"])
-        print("Mentions count", content_data["mentions_count"])
+        # print("Hastags", content_data["hashtags_used"])
+        # print("Hastag count", content_data["hashtag_count"])
+        # print("All mentions", content_data["all_mentions"])
+        # print("Mentions count", content_data["mentions_count"])
 
         # Audio
         header_info = fetch_top_header_info(driver)
         content_data["audio_used"] = header_info["audio_used"]
         content_data["post_context"] = header_info["post_context"]
         content_data["paid_partnership"] = header_info["paid_partnership"]
-        print("Audio used:", content_data["audio_used"])
-        print("Post context:", content_data["post_context"])
-        print("Partnership:", content_data["paid_partnership"])
+        # print("Audio used:", content_data["audio_used"])
+        # print("Post context:", content_data["post_context"])
+        # print("Partnership:", content_data["paid_partnership"])
 
         engagement_metrics = fetch_engagement_metrics(driver)
         content_data["likes_count"] = engagement_metrics["likes_count"]
@@ -90,8 +90,8 @@ def huntContent(driver, username, data):
         # content_data["saves"] = engagement_metrics["saves"]
         # content_data["shares"] = engagement_metrics["shares"]
 
-        print("Like count:", content_data["likes_count"])
-        print("Comments count:", content_data["comments_count"])
+        # print("Like count:", content_data["likes_count"])
+        # print("Comments count:", content_data["comments_count"])
         # print("Views count:",content_data["views_count"])
         # print("Saves count:",content_data["saves"])
         # print("Shares count:",content_data["shares"])
@@ -373,7 +373,7 @@ def fetch_engagement_metrics(driver):
                 outer_span = comment_link_elem.find_element(By.XPATH, ".//span")
                 comment_text = outer_span.text.strip()
 
-            print(f"Extracted comment text: {comment_text}")
+            # print(f"Extracted comment text: {comment_text}")
 
             # Extract number from text like "View 1 comment", "View all 33 comments"
             match = re.search(r"\d[\d.,KMB]*", comment_text)

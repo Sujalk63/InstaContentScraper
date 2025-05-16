@@ -23,6 +23,7 @@ def hunt_user_data(driver):
     elif choice == "2":
         driver.quit()
         mobile_driver = login_to_instagram_mobile()
+        mobile_driver.maximize_window()
         print("\nHunting user content level data...\n")
         scrape_content(mobile_driver)
     else:

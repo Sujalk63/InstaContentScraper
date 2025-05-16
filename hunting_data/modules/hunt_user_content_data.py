@@ -9,9 +9,10 @@ from hunting_data.modules.hunt_profile_data_functions import *
 from selenium.webdriver.support import expected_conditions as EC
 from username_scraping.modules.scrape_usernames_from_explore import next_button_click
 from username_scraping.modules.scrape_usernames_from_explore import click_post
+from utilities.flatten_data import flatten_data_for_saving
 
 
-def scrape_content(driver, usernames=None, batch_size=100):
+def scrape_content(driver, usernames=None, batch_size=1):
 
     # Handle all three input cases
     if usernames is None:
@@ -47,7 +48,13 @@ def scrape_content(driver, usernames=None, batch_size=100):
                 # mark_profile_done(username)
                 continue
 
-            content_data_batch.append(data)
+            flattened_posts = flatten_data_for_saving(data)
+            content_data_batch.extend(flattened_posts)
+
+            for profile in content_data_batch:
+                mark_profile_done(profile["Username"])
+
+            # content_data_batch.append(data)
 
             if len(content_data_batch) >= batch_size:
                 save_data_to_excel(
@@ -57,8 +64,11 @@ def scrape_content(driver, usernames=None, batch_size=100):
                 )
 
                 print(f"✅ Saved batch of {batch_size} profiles to Excel.")
-                for profile in content_data_batch:
-                    mark_profile_done(profile["Username"])
+                # usernames_saved = set(row["Username"] for row in content_data_batch)
+                # for username in usernames_saved:
+                #     mark_profile_done(username)
+                # for profile in content_data_batch:
+                #     mark_profile_done(profile["Username"])
                 content_data_batch = []
 
     finally:
@@ -72,8 +82,12 @@ def scrape_content(driver, usernames=None, batch_size=100):
                 table_name="contentDataTable",
             )
 
-            for profile in content_data_batch:
-                mark_profile_done(profile["Username"])
+            # usernames_saved = set(row["Username"] for row in content_data_batch)
+            # for username in usernames_saved:
+            #     mark_profile_done(username) #cleaner and faster execution happens once
+
+            # for profile in content_data_batch:
+            #     mark_profile_done(profile["Username"]) # no this approach becuz this will call usernames 13 times if it existed 13 times
 
 
 def fetch_content_data(driver, username):
@@ -90,16 +104,16 @@ def fetch_content_data(driver, username):
         return None
 
     data = {
-        "username": username,
+        "Username": username,
         "content": [],
     }
 
     click_post(driver)
 
-    n = 1
+    # n = 1
 
-    while n <= 13:
-        n = n + 1
+    while True:
+        # n = n + 1
         prev_url = driver.current_url
         # Extract the content data for the current post
         huntContent(driver, username, data)
@@ -113,7 +127,10 @@ def fetch_content_data(driver, username):
             print(f"❌ No more posts or failed to click next: {e}")
             break
 
+    print("before marked done")
+
     print(data["content"])
+
     return data
 
 
