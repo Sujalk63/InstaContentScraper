@@ -23,6 +23,7 @@ try:
     if task_choice == "1":
         scrape_username(driver)
     elif task_choice == "2":
+        # You’ll define this next,
         hunt_user_data(driver)
     else:
         print("Invalid choice. Please enter 1 or 2.")

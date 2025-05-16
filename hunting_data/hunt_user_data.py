@@ -27,3 +27,6 @@ def hunt_user_data(driver):
         scrape_content(mobile_driver)
     else:
         print("Invalid choice. Please enter 1 or 2.")
+
+
+        

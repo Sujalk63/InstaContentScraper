@@ -1,4 +1,4 @@
-import time 
+import time
 import pandas as pd
 from selenium.webdriver.common.by import By
 from utilities.save_to_excel import save_data_to_excel
@@ -76,9 +76,7 @@ def scrape_content(driver, usernames=None, batch_size=100):
                 mark_profile_done(profile["Username"])
 
 
-def fetch_content_data(driver, username): 
-
-
+def fetch_content_data(driver, username):
 
     url = f"https://www.instagram.com/{username}/"
 
@@ -100,8 +98,8 @@ def fetch_content_data(driver, username):
 
     n = 1
 
-    while n<=13:
-        n = n+1
+    while n <= 13:
+        n = n + 1
         prev_url = driver.current_url
         # Extract the content data for the current post
         huntContent(driver, username, data)

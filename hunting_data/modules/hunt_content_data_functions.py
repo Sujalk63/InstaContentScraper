@@ -1,5 +1,6 @@
 import html
 import pytz
+import time
 from math import gcd
 from datetime import datetime
 from urllib.parse import urlparse
@@ -107,7 +108,7 @@ def huntContent(driver, username, data):
 
 
 def article_existence(driver):
-    article = WebDriverWait(driver, 5).until(
+    article = WebDriverWait(driver, 3).until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, "article")
         )  # or another known container
@@ -203,6 +204,17 @@ def fetch_aspect_ratio(driver):
 def fetch_caption_text(driver):
     try:
         article_existence(driver)
+
+        try:
+            more_button = WebDriverWait(driver, t).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//div[@role='button']//span[normalize-space()='more']")
+                )
+            )
+            more_button.click()
+            time.sleep(1)  # brief wait after clicking
+        except:
+            pass  # no "more" button, proceed as usual
 
         h1_elem = WebDriverWait(driver, t).until(
             EC.presence_of_element_located(
@@ -324,9 +336,7 @@ def fetch_top_header_info(driver):
 
 def fetch_engagement_metrics(driver):
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//article"))
-        )
+        article_existence(driver)
 
         # --- Likes Count ---
         likes = None
