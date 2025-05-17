@@ -51,7 +51,6 @@ def scrape_profiles(driver, usernames=None, batch_size=100):
             
 
             if len(profile_data_batch) >= batch_size:
-                print("inside if")
                 save_data_to_excel(
                     profile_data_batch,
                     file_path="usernames_profile_data.xlsx",

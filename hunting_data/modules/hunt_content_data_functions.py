@@ -118,8 +118,13 @@ def huntContent(driver, username, data):
 
         return data
 
+    except KeyboardInterrupt:
+        print(f"⚠️ Interrupted while scraping a post for {username}")
+        return data
+        raise  # Re-raise to bubble it up to the outer try block
+
     except Exception as e:
-        print(f"❌ Failed to extract content ID for {username}: {e}")
+        print(f"❌ Failed to content for {username}: {e}")
 
 
 def article_existence(driver):

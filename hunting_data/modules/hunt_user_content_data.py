@@ -12,7 +12,7 @@ from username_scraping.modules.scrape_usernames_from_explore import click_post
 from utilities.flatten_data import flatten_data_for_saving
 
 
-def scrape_content(driver, usernames=None, batch_size=1):
+def scrape_content(driver, usernames=None):
 
     # Handle all three input cases
     if usernames is None:
@@ -41,53 +41,50 @@ def scrape_content(driver, usernames=None, batch_size=1):
                 print(f"⏭️ Skipping {username} (already marked as Done)")
                 continue
 
-            data = fetch_content_data(driver, username)
+            data, interurupted = fetch_content_data(driver, username)
 
             if data is None:
                 print(f"⚠️ {username} changed or deleted")
-                # mark_profile_done(username)
+                mark_profile_done(username)
                 continue
 
             flattened_posts = flatten_data_for_saving(data)
             content_data_batch.extend(flattened_posts)
 
-            # for profile in content_data_batch:
-            #     mark_profile_done(profile["Username"])
+            if not interurupted:
+                if content_data_batch:
+                    print(
+                        f"💾 Whole data fetched for {username}, saving and marking as done"
+                    )
+                    save_data_to_excel(
+                        content_data_batch,
+                        file_path="usernames_content_data.xlsx",
+                        table_name="contentDataTable",
+                    )
+                for profile in content_data_batch:
+                    mark_profile_done(profile["Username"])
+                # print("Username Marked done")
+            else:
+                if content_data_batch:
+                    print(
+                        f"⚠️  💾Partial data fetched for {username}, saving and not marking as done."
+                    )
+                    save_data_to_excel(
+                        content_data_batch,
+                        file_path="usernames_content_data.xlsx",
+                        table_name="contentDataTable",
+                    )
 
-            # content_data_batch.append(data)
-
-            if len(content_data_batch) >= batch_size:
-                save_data_to_excel(
-                    content_data_batch,
-                    file_path="usernames_content_data.xlsx",
-                    table_name="contentDataTable",
-                )
-
-                print(f"✅ Saved batch of {batch_size} profiles to Excel.")
-                # usernames_saved = set(row["Username"] for row in content_data_batch)
-                # for username in usernames_saved:
-                #     mark_profile_done(username)
-                # for profile in content_data_batch:
-                #     mark_profile_done(profile["Username"])
-                content_data_batch = []
-
-    finally:
+    except KeyboardInterrupt:
         if content_data_batch:
             print(
-                f"⚠️ Saving final unsaved batch of {len(content_data_batch)} profiles."
+                f"⚠️ Saving partial content data of length {len(content_data_batch)} for {username}"
             )
             save_data_to_excel(
                 content_data_batch,
                 file_path="usernames_content_data.xlsx",
                 table_name="contentDataTable",
             )
-
-            # usernames_saved = set(row["Username"] for row in content_data_batch)
-            # for username in usernames_saved:
-            #     mark_profile_done(username) #cleaner and faster execution happens once
-
-            # for profile in content_data_batch:
-            #     mark_profile_done(profile["Username"]) # no this approach becuz this will call usernames 13 times if it existed 13 times
 
 
 def fetch_content_data(driver, username):
@@ -112,26 +109,33 @@ def fetch_content_data(driver, username):
 
     n = 1
 
-    while n <= 6:  # n<=3
-        n = n + 1
-        prev_url = driver.current_url
-        # Extract the content data for the current post
-        huntContent(driver, username, data)
+    try:
+        while n <= 5:  # n<=3
+            n = n + 1
+            prev_url = driver.current_url
+            # Extract the content data for the current post
+            huntContent(driver, username, data)
 
-        # Try to click the next button
-        try:
-            time.sleep(2)
-            next_button_click(driver)
-            WebDriverWait(driver, 10).until(EC.url_changes(prev_url))
-        except Exception as e:
-            print(f"❌ No more posts or failed to click next: {e}")
-            break
+            # Try to click the next button
+            try:
+                time.sleep(2)
+                next_button_click(driver)
+                WebDriverWait(driver, 10).until(EC.url_changes(prev_url))
+            except Exception as e:
+                print(f"❌ No more posts or failed to click next: {e}")
+                break
 
-    print(f'✅ Scraped data complete for: {username}, 🔢 total size of posts: {len(data)}')
+    except KeyboardInterrupt:
+        print(f"⚠️ Interrupted while scraping {username}, returning partial data...")
+        return data, True  # Interrupted = True
+
+    print(
+        f"✅ Scraped data complete for: {username}, 🔢 total size of posts: {len(data)}"
+    )
 
     print(data["content"])
 
-    return data
+    return data, False  # Interrupted = False means full scrap
 
 
 def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames
