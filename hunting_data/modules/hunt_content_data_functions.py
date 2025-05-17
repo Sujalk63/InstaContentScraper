@@ -1,7 +1,11 @@
 import html
 import pytz
 import time
+import re
+import base64
+import json
 from math import gcd
+from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
@@ -183,7 +187,9 @@ def fetch_aspect_ratio(driver):
         try:
             # If video not found, try for image
             image = WebDriverWait(driver, t).until(
-                EC.presence_of_element_located((By.TAG_NAME, "img"))
+                EC.presence_of_element_located(
+                    (By.XPATH, '//div[@role="button"]//img[contains(@src, "efg=")]')
+                )
             )
             width = driver.execute_script("return arguments[0].naturalWidth;", image)
             height = driver.execute_script("return arguments[0].naturalHeight;", image)
@@ -193,12 +199,48 @@ def fetch_aspect_ratio(driver):
 
     try:
         if width and height:
-            divisor = gcd(width, height)
-            return f"{int(width / divisor)}:{int(height / divisor)}"
+            return closest_common_aspect_ratio(width, height)
         else:
             return "Unknown"
     except:
+        print(f"❌ Error calculating aspect ratio: {e}")
         return None
+
+
+def closest_common_aspect_ratio(width, height):
+    # Common aspect ratios to check against (width:height)
+    common_ratios = {
+        "1:1": (1, 1),
+        "4:5": (4, 5),
+        "5:4": (5, 4),
+        "9:16": (9, 16),
+        "16:9": (16, 9),
+        "3:4": (3, 4),
+        "4:3": (4, 3),
+        "2:3": (2, 3),
+        "3:2": (3, 2),
+    }
+
+    # Calculate actual ratio as float
+    actual_ratio = width / height
+
+    # Find closest common ratio by minimal absolute difference
+    closest_label = None
+    smallest_diff = float("inf")
+    for label, (w, h) in common_ratios.items():
+        ratio = w / h
+        diff = abs(actual_ratio - ratio)
+        if diff < smallest_diff:
+            smallest_diff = diff
+            closest_label = label
+
+    # Accept only if difference is small enough (tweak threshold if needed)
+    if smallest_diff < 0.05:
+        return closest_label
+    else:
+        # Return simplified raw ratio if no close match found
+        divisor = gcd(width, height)
+        return f"{int(width / divisor)}:{int(height / divisor)}"
 
 
 def fetch_caption_text(driver):

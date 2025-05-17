@@ -51,8 +51,8 @@ def scrape_content(driver, usernames=None, batch_size=1):
             flattened_posts = flatten_data_for_saving(data)
             content_data_batch.extend(flattened_posts)
 
-            for profile in content_data_batch:
-                mark_profile_done(profile["Username"])
+            # for profile in content_data_batch:
+            #     mark_profile_done(profile["Username"])
 
             # content_data_batch.append(data)
 
@@ -110,10 +110,10 @@ def fetch_content_data(driver, username):
 
     click_post(driver)
 
-    # n = 1
+    n = 1
 
-    while True:
-        # n = n + 1
+    while n <= 3:  # n<=3
+        n = n + 1
         prev_url = driver.current_url
         # Extract the content data for the current post
         huntContent(driver, username, data)
