@@ -112,7 +112,7 @@ def fetch_content_data(driver, username):
 
     n = 1
 
-    while n <= 3:  # n<=3
+    while n <= 6:  # n<=3
         n = n + 1
         prev_url = driver.current_url
         # Extract the content data for the current post
@@ -127,7 +127,7 @@ def fetch_content_data(driver, username):
             print(f"❌ No more posts or failed to click next: {e}")
             break
 
-    print("before marked done")
+    print(f'✅ Scraped data complete for: {username}, 🔢 total size of posts: {len(data)}')
 
     print(data["content"])
 

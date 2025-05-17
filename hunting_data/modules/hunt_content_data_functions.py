@@ -22,14 +22,18 @@ def huntContent(driver, username, data):
     content_data = build_content_template()
 
     try:
+        # content id
+        content_data["content_id"] = fetch_content_id(driver)
+        print(
+            "🟢 Started scraping for content id:",
+            content_data["content_id"],
+            "of",
+            username,
+        )
 
         # # post type
         content_data["post_type"] = fetch_post_type(driver)
         # print("Post type:", content_data["post_type"])
-
-        # content id
-        content_data["content_id"] = fetch_content_id(driver)
-        # print("Content id:", content_data["content_id"])
 
         # post time
         content_data["posted_time_details"] = fetch_posted_time(driver)
@@ -104,6 +108,13 @@ def huntContent(driver, username, data):
             data["content"] = []
 
         data["content"].append(content_data)
+
+        print(
+            "✅ Scrape complete for content id:",
+            content_data["content_id"],
+            "of",
+            username,
+        )
 
         return data
 
@@ -188,9 +199,15 @@ def fetch_aspect_ratio(driver):
             # If video not found, try for image
             image = WebDriverWait(driver, t).until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@role="button"]//img[contains(@src, "efg=")]')
+                    (
+                        By.XPATH,
+                        "//div[@role='button' and contains(@class, 'x1qjc9v5')]//img"
+                        "[contains(@class, 'x5yr21d') and contains(@class, 'xu96u03') and contains(@class, 'x10l6tqk') and contains(@class, 'x13vifvy') and contains(@class, 'x87ps6o') and contains(@class, 'xh8yej3')]",
+                    )
                 )
             )
+            # src = image.get_attribute("src")
+            # print(src)
             width = driver.execute_script("return arguments[0].naturalWidth;", image)
             height = driver.execute_script("return arguments[0].naturalHeight;", image)
         except Exception as e:
@@ -491,3 +508,6 @@ def build_content_template():
         # "saves": None,
         # "shares": None,
     }
+
+
+# https://scontent.cdninstagram.com/v/t51.75761-15/497106940_18014250902709093_1799818465998331702_n.jpg?stp=dst-jpegr_e35_tt6&_nc_cat=111&cb=30a688f7-097e4a6c&ccb=7-5&_nc_sid=58cdad&_nc_ohc=Jnac8d5pfo8Q7kNvwFlAEF0&_nc_oc=AdlxmQXtN7whpm9_k3GvqDm_lg5fTjJyJdWm7Hqcd2h7ZKxzRlGT0y1aaEaDJM_dhMuP9JStNYUVD7JEnOdzmQMe&_nc_ad=z-m&_nc_cid=1174&_nc_zt=23&se=-1&_nc_ht=scontent.cdninstagram.com&_nc_gid=Q15RtQrdh5pOkEE1DBLy_g&oh=00_AfJfKSjRnHZeCHPvh8zI2huiBPgkZCbfim9TXRIxNBySVw&oe=682E0A8F
