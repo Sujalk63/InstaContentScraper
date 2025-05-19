@@ -25,28 +25,59 @@ def save_data_to_excel(data, file_path, table_name):
 
         new_df = pd.DataFrame(data)
 
-        if not os.path.exists(file_path):
-            # File doesn't exist: create new
-            new_df.to_excel(file_path, index=False)
-            print(f"✅ Created new file and saved {len(data)} profile(s).")
+        # Determine data type based on columns
+        if "content_id" in new_df.columns:
+            unique_col = "content_id"
+            data_type = "content-level"
+        elif "Username" in new_df.columns and "content_id" not in new_df.columns:
+            unique_col = "Username"
+            data_type = "profile-level"
         else:
-            # File exists: read and append non-duplicate data
+            print("❌ Cannot determine data type: missing 'Username' or 'Content ID'.")
+            return
+
+        # if not os.path.exists(file_path):
+        #     # File doesn't exist: create new
+        #     new_df.to_excel(file_path, index=False)
+        #     print(f"✅ Created new file and saved {len(data)} profile(s).")
+        # else:
+        #     # File exists: read and append non-duplicate data
+        #     existing_df = pd.read_excel(file_path)
+
+        #     # Filter out profiles that already exist based on Username
+        #     new_df = new_df[~new_df["Username"].isin(existing_df["Username"])]
+
+        #     if new_df.empty:
+        #         print("⚠️ All usernames already exist in file. Skipping save.")
+        #         return
+
+        #     updated_df = pd.concat([existing_df, new_df], ignore_index=True)
+        #     updated_df.to_excel(file_path, index=False)
+        #     print(f"✅ Appended {len(new_df)} new profile(s) to existing file.")
+
+        if not os.path.exists(file_path):
+            new_df.to_excel(file_path, index=False)
+            print(f"✅ Created new file and saved {len(new_df)} {data_type} record(s).")
+        else:
             existing_df = pd.read_excel(file_path)
 
-            # Filter out profiles that already exist based on Username
-            new_df = new_df[~new_df["Username"].isin(existing_df["Username"])]
+            # Remove duplicates based on unique identifier
+            new_df = new_df[~new_df[unique_col].isin(existing_df[unique_col])]
 
             if new_df.empty:
-                print("⚠️ All usernames already exist in file. Skipping save.")
+                print(
+                    f"⚠️ All {data_type} records already exist in file. Skipping save."
+                )
                 return
 
             updated_df = pd.concat([existing_df, new_df], ignore_index=True)
             updated_df.to_excel(file_path, index=False)
-            print(f"✅ Appended {len(new_df)} new profile(s) to existing file.")
-    
+            print(
+                f"✅ Appended {len(new_df)} new {data_type} record(s) to existing file."
+            )
+
     except Exception as e:
         print(f"❌ Error Saving the batch to excel: {e}")
-
 
     # Format Excel sheet as a styled table
     try:
