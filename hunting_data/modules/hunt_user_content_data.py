@@ -3,7 +3,7 @@ import pandas as pd
 from selenium.webdriver.common.by import By
 from utilities.save_to_excel import save_data_to_excel
 from selenium.webdriver.support.ui import WebDriverWait
-from utilities.load_done_status import load_done_status
+from utilities.load_scaped_data import *
 from hunting_data.modules.hunt_content_data_functions import *
 from hunting_data.modules.hunt_profile_data_functions import *
 from selenium.webdriver.support import expected_conditions as EC
@@ -89,17 +89,22 @@ def scrape_content(driver, usernames=None):
 
 def fetch_content_data(driver, username):
 
+    t = 2
+
+    done_content_ids = load_scraped_content_ids(
+        excel_path="usernames_content_data.xlsx"
+    )
     # driver.refresh()
     url = f"https://www.instagram.com/{username}/"
 
     try:
         driver.get(url)
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, t).until(
             EC.presence_of_element_located((By.CLASS_NAME, "xrvj5dj"))
         )
     except Exception as e:
         print(f"❌ Profile page did not load properly for {username}: {e}")
-        return None
+        return None, False
 
     data = {
         "Username": username,
@@ -108,22 +113,46 @@ def fetch_content_data(driver, username):
 
     click_post(driver)
 
-    # n = 1
-
     try:
-        while True:  # n<=3
-            # n = n + 1
+        while True:
             prev_url = driver.current_url
-            # Extract the content data for the current post
-            huntContent(driver, username, data)
 
-            # Try to click the next button
+            # Fetch content_id only first
+            content_id = fetch_content_id_only(driver)
+
+            if content_id is None:
+                print("❌ Could not get content_id, skipping this post...")
+                # Try to move to next post
+                try:
+                    next_button_click(driver)
+                    WebDriverWait(driver, t).until(EC.url_changes(prev_url))
+                    continue
+                except Exception:
+                    print("❌ No more posts or failed to click next.")
+                    break
+
+            if content_id in done_content_ids:
+                print(f"⏭️ Skipping already scraped content_id: {content_id}")
+                # Move to next post
+                try:
+                    next_button_click(driver)
+                    # time.sleep(1.5)
+                    WebDriverWait(driver, t).until(EC.url_changes(prev_url))
+                    continue
+                except Exception:
+                    print("❌ No more posts or failed to click next.")
+                    break
+
+            # If not scraped, scrape full data
+            data = huntContent(driver, username, data)
+            done_content_ids.add(content_id)
+
+            # Move to next post
             try:
-                time.sleep(2)
                 next_button_click(driver)
-                WebDriverWait(driver, 10).until(EC.url_changes(prev_url))
-            except Exception as e:
-                print(f"❌ No more posts or failed to click next: {e}")
+                WebDriverWait(driver, t).until(EC.url_changes(prev_url))
+            except Exception:
+                print("❌ No more posts or failed to click next.")
                 break
 
     except KeyboardInterrupt:
@@ -131,12 +160,10 @@ def fetch_content_data(driver, username):
         return data, True  # Interrupted = True
 
     print(
-        f"✅ Scraped data complete for: {username}, 🔢 total size of posts: {len(data)}"
+        f"✅ Scraped data complete for: {username}, 🔢 total size of posts: {len(data['content'])}"
     )
 
-    print(data["content"])
-
-    return data, False  # Interrupted = False means full scrap
+    return data, False  # Interrupted = False means full scrape
 
 
 def mark_profile_done(username, excel_path="usernames_dummy.xlsx"):  # later usernames

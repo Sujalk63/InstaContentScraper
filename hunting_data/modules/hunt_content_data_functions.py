@@ -136,6 +136,15 @@ def article_existence(driver):
     return article
 
 
+def fetch_content_id_only(driver):
+    try:
+        content_id = fetch_content_id(driver)
+        return content_id
+    except Exception as e:
+        print(f"❌ Failed to fetch content_id: {e}")
+        return None
+
+
 def fetch_post_type(driver):
     is_reel = False
     try:
@@ -275,10 +284,12 @@ def fetch_caption_text(driver):
                     (By.XPATH, "//div[@role='button' and .//span[text()='more']]")
                 )
             )
-            print("printing more button:", more_button)
+            # print("printing more button:", more_button)
             # more_button.click()
-            driver.execute_script("arguments[0].click();", more_button) # Using JavaScript click to bypass Selenium click issues (e.g., element hidden, overlapped, or not interactable)
-            print("clicked more button")
+            driver.execute_script(
+                "arguments[0].click();", more_button
+            )  # Using JavaScript click to bypass Selenium click issues (e.g., element hidden, overlapped, or not interactable)
+            # print("clicked more button")
             # time.sleep(1)  # brief wait after clicking
         except:
             print("didint find more button")
