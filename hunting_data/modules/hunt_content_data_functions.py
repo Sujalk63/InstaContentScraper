@@ -272,12 +272,16 @@ def fetch_caption_text(driver):
         try:
             more_button = WebDriverWait(driver, t).until(
                 EC.element_to_be_clickable(
-                    (By.XPATH, "//div[@role='button']//span[normalize-space()='more']")
+                    (By.XPATH, "//div[@role='button' and .//span[text()='more']]")
                 )
             )
-            more_button.click()
-            time.sleep(1)  # brief wait after clicking
+            print("printing more button:", more_button)
+            # more_button.click()
+            driver.execute_script("arguments[0].click();", more_button) # Using JavaScript click to bypass Selenium click issues (e.g., element hidden, overlapped, or not interactable)
+            print("clicked more button")
+            # time.sleep(1)  # brief wait after clicking
         except:
+            print("didint find more button")
             pass  # no "more" button, proceed as usual
 
         h1_elem = WebDriverWait(driver, t).until(

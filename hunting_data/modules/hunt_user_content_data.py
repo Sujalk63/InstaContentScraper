@@ -89,6 +89,7 @@ def scrape_content(driver, usernames=None):
 
 def fetch_content_data(driver, username):
 
+    # driver.refresh()
     url = f"https://www.instagram.com/{username}/"
 
     try:
@@ -107,11 +108,11 @@ def fetch_content_data(driver, username):
 
     click_post(driver)
 
-    n = 1
+    # n = 1
 
     try:
-        while n <= 5:  # n<=3
-            n = n + 1
+        while True:  # n<=3
+            # n = n + 1
             prev_url = driver.current_url
             # Extract the content data for the current post
             huntContent(driver, username, data)
