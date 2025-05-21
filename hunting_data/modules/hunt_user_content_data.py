@@ -94,7 +94,6 @@ def fetch_content_data(driver, username):
     done_content_ids = load_scraped_content_ids(
         excel_path="usernames_content_data.xlsx"
     )
-    # driver.refresh()
     url = f"https://www.instagram.com/{username}/"
 
     try:
@@ -114,7 +113,9 @@ def fetch_content_data(driver, username):
     click_post(driver)
 
     try:
-        while True:
+        n = 1
+        while n<=5:  # n<=5
+            n = n+1
             prev_url = driver.current_url
 
             # Fetch content_id only first
@@ -122,10 +123,12 @@ def fetch_content_data(driver, username):
 
             if content_id is None:
                 print("❌ Could not get content_id, skipping this post...")
-                # Try to move to next post
                 try:
                     next_button_click(driver)
-                    WebDriverWait(driver, t).until(EC.url_changes(prev_url))
+                    new_url = driver.current_url
+                    if prev_url == new_url:
+                        print("❌ Reached last post, cannot move forward.")
+                        break
                     continue
                 except Exception:
                     print("❌ No more posts or failed to click next.")
@@ -133,24 +136,22 @@ def fetch_content_data(driver, username):
 
             if content_id in done_content_ids:
                 print(f"⏭️ Skipping already scraped content_id: {content_id}")
-                # Move to next post
                 try:
                     next_button_click(driver)
-                    # time.sleep(1.5)
-                    WebDriverWait(driver, t).until(EC.url_changes(prev_url))
                     continue
                 except Exception:
                     print("❌ No more posts or failed to click next.")
                     break
 
-            # If not scraped, scrape full data
             data = huntContent(driver, username, data)
             done_content_ids.add(content_id)
 
-            # Move to next post
             try:
                 next_button_click(driver)
-                WebDriverWait(driver, t).until(EC.url_changes(prev_url))
+                new_url = driver.current_url
+                if prev_url == new_url:
+                    print("❌ Reached last post, cannot move forward.")
+                    break
             except Exception:
                 print("❌ No more posts or failed to click next.")
                 break
