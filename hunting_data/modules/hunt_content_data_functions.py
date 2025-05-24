@@ -14,7 +14,7 @@ from hunting_data.modules.hunt_profile_data_functions import *
 from hunting_data.modules.hunt_content_data_functions import *
 from selenium.webdriver.support import expected_conditions as EC
 
-t = 1
+t = 3
 
 
 def huntContent(driver, username, data):
@@ -128,7 +128,7 @@ def huntContent(driver, username, data):
 
 
 def article_existence(driver):
-    article = WebDriverWait(driver, 3).until(
+    article = WebDriverWait(driver, t).until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, "article")
         )  # or another known container
@@ -205,6 +205,7 @@ def fetch_aspect_ratio(driver):
         video = WebDriverWait(driver, t).until(
             EC.presence_of_element_located((By.TAG_NAME, "video"))
         )
+        # print("found video:", video)
         width = driver.execute_script("return arguments[0].videoWidth;", video)
         height = driver.execute_script("return arguments[0].videoHeight;", video)
 
@@ -221,7 +222,7 @@ def fetch_aspect_ratio(driver):
                 )
             )
             # src = image.get_attribute("src")
-            # print(src)
+            # print("found image:", src)
             width = driver.execute_script("return arguments[0].naturalWidth;", image)
             height = driver.execute_script("return arguments[0].naturalHeight;", image)
         except Exception as e:
@@ -231,8 +232,8 @@ def fetch_aspect_ratio(driver):
     try:
         if width and height:
             return closest_common_aspect_ratio(width, height)
-        else:
-            return "Unknown"
+        # else:
+        #     return "Unknown"
     except:
         print(f"❌ Error calculating aspect ratio: {e}")
         return None

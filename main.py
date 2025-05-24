@@ -33,6 +33,10 @@ finally:
     driver.quit()
 
 
+# ⏭️ Skipping a4amaira (already marked as Done)
+# archiiiii.x 1
+# ⏭️ Skipping archiiiii.x (already marked as Done)
+
 # without using cookie
 
 # import os
