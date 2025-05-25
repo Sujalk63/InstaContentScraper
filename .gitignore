@@ -13,7 +13,7 @@
 /v1/assets
 /v1/backup_files
 /v1/cookies/insta_cookies.json
-/v1/env
+/v1/.env
 /v1/challenges.txt
 /v1/usernames_content_data.xlsx
 /v1/usernames_database_original.xlsx
