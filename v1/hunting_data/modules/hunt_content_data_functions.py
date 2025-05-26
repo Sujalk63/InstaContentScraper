@@ -14,7 +14,7 @@ from hunting_data.modules.hunt_profile_data_functions import *
 from hunting_data.modules.hunt_content_data_functions import *
 from selenium.webdriver.support import expected_conditions as EC
 
-t = 2
+t = 1.5
 
 
 def huntContent(driver, username, data):
@@ -128,7 +128,7 @@ def huntContent(driver, username, data):
 
 
 def article_existence(driver):
-    article = WebDriverWait(driver, t).until(
+    article = WebDriverWait(driver, 2).until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, "article")
         )  # or another known container
@@ -184,6 +184,13 @@ def fetch_video_duration(driver):
             EC.presence_of_element_located((By.TAG_NAME, "video"))
         )
 
+        # print("video element from VD()", video_element)
+
+        WebDriverWait(driver, t).until(
+            lambda d: d.execute_script("return arguments[0].duration;", video_element)
+            > 0
+        )
+
         # Use JavaScript to access the duration property of the video
         duration = driver.execute_script("return arguments[0].duration;", video_element)
 
@@ -205,7 +212,16 @@ def fetch_aspect_ratio(driver):
         video = WebDriverWait(driver, t).until(
             EC.presence_of_element_located((By.TAG_NAME, "video"))
         )
-        # print("found video:", video)
+
+        driver.execute_script("arguments[0].scrollIntoView(true);", video)
+        driver.execute_script("arguments[0].play();", video)
+        # print("found video from aspect ratio:", video)
+
+        WebDriverWait(driver, t).until(
+            lambda d: d.execute_script("return arguments[0].videoHeight;", video) > 0
+            and d.execute_script("return arguments[0].videoWidth;", video) > 0
+        )
+
         width = driver.execute_script("return arguments[0].videoWidth;", video)
         height = driver.execute_script("return arguments[0].videoHeight;", video)
 
@@ -221,8 +237,18 @@ def fetch_aspect_ratio(driver):
                     )
                 )
             )
+
+            WebDriverWait(driver, t).until(
+                lambda d: driver.execute_script(
+                    "return arguments[0].naturalWidth;", image
+                )
+                > 0
+                and driver.execute_script("return arguments[0].naturalHeight;", image)
+                > 0
+            )
             # src = image.get_attribute("src")
-            # print("found image:", src)
+            # print("found image from aspect ratio:", src)
+
             width = driver.execute_script("return arguments[0].naturalWidth;", image)
             height = driver.execute_script("return arguments[0].naturalHeight;", image)
         except Exception as e:

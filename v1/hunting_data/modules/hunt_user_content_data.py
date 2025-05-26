@@ -118,6 +118,23 @@ def fetch_content_data(driver, username):
             # n = n+1
             prev_url = driver.current_url
 
+            posted_time_details = fetch_posted_time(driver)
+
+            if posted_time_details:
+                post_date_str = posted_time_details.split("T")[0]  # "YYYY-MM-DD"
+                post_date = datetime.strptime(post_date_str, "%Y-%m-%d").date()
+                # print(post_date_str, post_date)
+
+                cutoff_date = datetime(2023, 1, 1).date()
+
+                if post_date < cutoff_date:
+                    print(
+                        f"📅 Post date {post_date} is before cutoff date {cutoff_date}, moving to next user."
+                    )
+                    break  # This will exit the while loop for the current username
+            else:
+                print("❌ Could not fetch post date, skipping post")
+
             # Fetch content_id only first
             content_id = fetch_content_id_only(driver)
 
@@ -125,7 +142,7 @@ def fetch_content_data(driver, username):
                 print("❌ Could not get content_id, skipping this post...")
                 try:
                     next_button_click(driver)
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                     new_url = driver.current_url
                     if prev_url == new_url:
                         print("❌ Reached last post, cannot move forward.")
@@ -149,7 +166,7 @@ def fetch_content_data(driver, username):
 
             try:
                 next_button_click(driver)
-                time.sleep(0.1)
+                time.sleep(0.2)
                 new_url = driver.current_url
                 if prev_url == new_url:
                     print("❌ Reached last post, cannot move forward.")
